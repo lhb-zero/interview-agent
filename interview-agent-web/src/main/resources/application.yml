@@ -1,0 +1,69 @@
+server:
+  port: 8180
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: interview-agent
+
+  # ==================== 数据源配置 ====================
+  datasource:
+    url: jdbc:postgresql://localhost:5600/interview_agent
+    username: interview_agent
+    password: interview_agent_2026
+    driver-class-name: org.postgresql.Driver
+
+  # ==================== Spring AI 配置 ====================
+  ai:
+    # Ollama 配置
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: qwen3.5:4b
+          temperature: 0.5
+          top-p: 0.9
+      embedding:
+        options:
+          model: bge-m3
+
+    # PGVector 向量存储配置
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1024
+
+  # ==================== 文件上传配置 ====================
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+# ==================== MyBatis-Plus 配置 ====================
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  # 逻辑删除仅在 @TableLogic 注解的实体字段上生效，不全局配置
+  # 避免影响没有 status 字段的表（chat_session、chat_message 等）
+
+# ==================== Knife4j 接口文档配置 ====================
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+# ==================== 日志配置 ====================
+logging:
+  level:
+    com.interview.agent: DEBUG
+    org.springframework.ai: DEBUG

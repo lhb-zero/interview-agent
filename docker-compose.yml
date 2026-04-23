@@ -1,0 +1,28 @@
+# =====================================================
+# 面试智能助手 - Docker Compose 配置
+# PostgreSQL 16 + PGVector 扩展
+# =====================================================
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: interview-agent-postgres
+    environment:
+      POSTGRES_DB: interview_agent
+      POSTGRES_USER: interview_agent
+      POSTGRES_PASSWORD: interview_agent_2026
+    ports:
+      - "5600:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./interview-agent-web/src/main/resources/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U interview_agent -d interview_agent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    driver: local
