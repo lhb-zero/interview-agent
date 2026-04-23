@@ -15,7 +15,10 @@
         <el-option label="中级" value="中级" />
         <el-option label="高级" value="高级" />
       </el-select>
-      <el-switch v-model="ragEnabled" active-text="RAG" inactive-text="" style="margin-left: 16px" />
+      <el-switch v-model="ragEnabled" active-text="知识库增强" inactive-text="" style="margin-left: 16px" />
+      <el-tooltip content="开启后，AI 会从知识库中检索相关文档来增强回答" placement="top">
+        <el-icon style="margin-left: 4px; color: #909399; cursor: help;"><QuestionFilled /></el-icon>
+      </el-tooltip>
       <el-switch v-model="thinkingEnabled" active-text="深度思考" inactive-text="" style="margin-left: 16px" :disabled="!supportsThinking" />
       <el-tooltip v-if="!supportsThinking" content="当前模型不支持深度思考" placement="top">
         <el-icon style="margin-left: 4px; color: #909399; cursor: help;"><QuestionFilled /></el-icon>
@@ -359,15 +362,18 @@ async function streamChat(text) {
 }
 
 async function streamRagChat(text) {
+  // RAG 模式：通过 Chat 接口 + ragEnabled=true，触发 Tool Calling
+  // LLM 会自主调用 KnowledgeSearchTool 检索知识库，然后用检索结果增强回答
   const params = new URLSearchParams({
     message: text,
     domain: domain.value,
     difficulty: difficulty.value,
+    ragEnabled: true,  // 关键：启用 RAG，后端会注册 KnowledgeSearchTool
     thinkingEnabled: thinkingEnabled.value
   })
   if (currentSessionId.value) params.append('sessionId', currentSessionId.value)
 
-  const response = await fetch(`/api/rag/chat/stream?${params.toString()}`)
+  const response = await fetch(`/api/chat/stream?${params.toString()}`)
   if (!response.ok) throw new Error('请求失败')
 
   messages.value.push({ role: 'assistant', content: '', streaming: false, renderedHtml: '' })

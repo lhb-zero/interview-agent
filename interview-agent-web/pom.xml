@@ -15,6 +15,12 @@
     <description>Web层：Controller、配置类、启动入口</description>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- 内部依赖 -->
         <dependency>
             <groupId>com.interview</groupId>

@@ -18,6 +18,14 @@
         <!-- 内部依赖 -->
         <dependency>
             <groupId>com.interview</groupId>
+            <artifactId>interview-agent-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.interview</groupId>
+            <artifactId>interview-agent-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.interview</groupId>
             <artifactId>interview-agent-dao</artifactId>
         </dependency>
 

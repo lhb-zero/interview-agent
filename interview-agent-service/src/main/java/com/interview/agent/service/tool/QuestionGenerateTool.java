@@ -52,7 +52,6 @@ public class QuestionGenerateTool {
             );
 
             OllamaChatOptions options = OllamaChatOptions.builder()
-                    .model(CommonConstant.DEFAULT_CHAT_MODEL)
                     .build();
             return chatModel.call(new Prompt(new UserMessage(prompt), options))
                     .getResult()

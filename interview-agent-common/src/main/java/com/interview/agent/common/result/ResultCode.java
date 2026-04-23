@@ -24,7 +24,8 @@ public enum ResultCode {
     DOCUMENT_PARSE_ERROR(5002, "文档解析失败"),
     EMBEDDING_ERROR(5003, "向量生成失败"),
     RAG_SEARCH_ERROR(5004, "RAG检索失败"),
-    CHAT_ERROR(5005, "对话生成失败");
+    CHAT_ERROR(5005, "对话生成失败"),
+    VECTOR_STORE_ERROR(5006, "向量存储失败");
 
     private final int code;
     private final String message;

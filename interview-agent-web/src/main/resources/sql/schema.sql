@@ -7,6 +7,24 @@
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- =====================================================
+-- 0. Spring AI PGVector 默认向量表（VectorStore）
+--
+-- Spring AI PgVectorVectorStore 默认使用 public.vector_store 表，字段为：
+-- id, content, metadata(jsonb), embedding(vector)
+-- （与日志中的 INSERT 语句保持一致）
+-- =====================================================
+CREATE TABLE IF NOT EXISTS vector_store (
+    id        VARCHAR(255) PRIMARY KEY,
+    content   TEXT,
+    metadata  JSONB,
+    embedding vector(1024)
+);
+
+CREATE INDEX IF NOT EXISTS idx_vector_store_embedding_hnsw
+    ON vector_store
+    USING hnsw (embedding vector_cosine_ops);
+
+-- =====================================================
 -- 1. 知识库文档表
 -- =====================================================
 CREATE TABLE IF NOT EXISTS knowledge_document (

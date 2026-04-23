@@ -34,17 +34,24 @@ public class SpringAiConfig {
      * 文本分块器（用于 RAG 文档导入）
      *
      * 面试亮点：Chunking 策略影响 RAG 效果
-     * - chunkSize: 每段最大 Token 数（500）
-     * - overlap: 相邻段重叠 Token 数（50），避免语义断裂
+     * - chunkSize: 每段最大 Token 数（800）— 适当增大以保留完整语义
+     * - minChunkSizeChars: 分块最小字符数（50）— 过短的块丢弃
+     * - minChunkLengthToEmbed: 可嵌入的最小分块长度（50）
+     * - maxNumChunks: 最大分块数（10000）— 大文档兜底
+     * - keepSeparator: 保留分隔符 — 维持段落结构
+     *
+     * 构造函数签名（Spring AI 1.1.0）：
+     * TokenTextSplitter(int chunkSize, int minChunkSizeChars, int minChunkLengthToEmbed,
+     *                   int maxNumChunks, boolean keepSeparator)
      */
     @Bean
     public TokenTextSplitter tokenTextSplitter() {
         return new TokenTextSplitter(
-                500,   // defaultChunkSize
-                50,    // minChunkSizeChars
-                50,    // maxNumChunks
-                100,   // maxChunkSizeChars
-                true   // keepSeparator
+                800,      // chunkSize — 每段最大 Token 数
+                50,       // minChunkSizeChars — 分块最小字符数
+                50,       // minChunkLengthToEmbed — 可嵌入的最小长度
+                10000,    // maxNumChunks — 最大分块数
+                true      // keepSeparator — 保留分隔符
         );
     }
 }

@@ -29,6 +29,9 @@ public class CommonConstant {
     /** RAG 检索默认 Top-K */
     public static final int RAG_DEFAULT_TOP_K = 5;
 
+    /** RAG 相似度阈值（余弦相似度，范围 -1~1，低于此值的检索结果不参与增强） */
+    public static final double RAG_SIMILARITY_THRESHOLD = 0.5;
+
     /** 文本分块默认大小（Token） */
     public static final int CHUNK_DEFAULT_SIZE = 500;
 

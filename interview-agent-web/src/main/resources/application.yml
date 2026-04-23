@@ -21,9 +21,11 @@ spring:
       base-url: http://localhost:11434
       chat:
         options:
-          model: qwen3.5:4b
+          model: qwen3:1.7b
+          # model: qwen3.5:4b
           temperature: 0.5
           top-p: 0.9
+          num-ctx: 4096
       embedding:
         options:
           model: bge-m3
@@ -40,6 +42,11 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
+
+# ==================== 应用自定义配置 ====================
+app:
+  upload:
+    dir: ${user.dir}/uploads
 
 # ==================== MyBatis-Plus 配置 ====================
 mybatis-plus:
@@ -66,4 +73,6 @@ knife4j:
 logging:
   level:
     com.interview.agent: DEBUG
-    org.springframework.ai: DEBUG
+    org.springframework.ai.ollama: DEBUG
+    org.springframework.ai.chat.client: DEBUG
+    org.springframework.ai.vectorstore: DEBUG

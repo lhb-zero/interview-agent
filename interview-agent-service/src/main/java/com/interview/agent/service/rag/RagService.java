@@ -20,9 +20,14 @@ public interface RagService {
     Flux<String> ragChatStream(ChatRequestDTO request);
 
     /**
-     * 导入文档到知识库
+     * 导入文档到知识库（不带文件类型，自动识别）
      */
     void importDocument(String filePath, String domain, String title);
+
+    /**
+     * 导入文档到知识库（指定文件类型）
+     */
+    void importDocument(String filePath, String domain, String title, String fileType);
 
     /**
      * 删除知识库文档

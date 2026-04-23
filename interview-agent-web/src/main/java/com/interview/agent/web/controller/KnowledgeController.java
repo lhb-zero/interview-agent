@@ -30,7 +30,8 @@ public class KnowledgeController {
     private final KnowledgeService knowledgeService;
     private final RagService ragService;
 
-    private static final String UPLOAD_DIR = "uploads/";
+    @org.springframework.beans.factory.annotation.Value("${app.upload.dir:${user.dir}/uploads}")
+    private String uploadDir;
 
     @Operation(summary = "上传文档到知识库")
     @PostMapping("/upload")
@@ -46,15 +47,20 @@ public class KnowledgeController {
                     originalFilename.substring(originalFilename.lastIndexOf(".")) : ".txt";
             String savedFileName = UUID.randomUUID().toString().replace("-", "") + fileExtension;
 
-            Path uploadPath = Paths.get(UPLOAD_DIR);
+            // 使用绝对路径，避免 file.transferTo() 基于 Tomcat 临时目录解析
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
             Path filePath = uploadPath.resolve(savedFileName);
             file.transferTo(filePath.toFile());
 
-            // 2. 导入到知识库（自动分块+Embedding+存储）
-            ragService.importDocument(filePath.toString(), domain, title);
+            // 2. 识别文件类型（不带点号）
+            String fileType = fileExtension.replace(".", "").toLowerCase();
+            if (fileType.equals("markdown")) fileType = "md";
+
+            // 3. 导入到知识库（自动分块 + Embedding + 向量存储）
+            ragService.importDocument(filePath.toString(), domain, title, fileType);
 
             return Result.success();
         } catch (IOException e) {
