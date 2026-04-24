@@ -1,80 +1,133 @@
 <template>
   <div class="chat-view">
-    <!-- 顶部工具栏 -->
     <div class="chat-toolbar">
-      <el-select v-model="domain" placeholder="选择领域" style="width: 140px" size="default">
-        <el-option label="Java" value="Java" />
-        <el-option label="Python" value="Python" />
-        <el-option label="AI/机器学习" value="AI" />
-        <el-option label="前端" value="Frontend" />
-        <el-option label="数据库" value="Database" />
-        <el-option label="系统设计" value="System" />
-      </el-select>
-      <el-select v-model="difficulty" placeholder="难度" style="width: 120px; margin-left: 12px" size="default">
-        <el-option label="基础" value="基础" />
-        <el-option label="中级" value="中级" />
-        <el-option label="高级" value="高级" />
-      </el-select>
-      <el-switch v-model="ragEnabled" active-text="知识库增强" inactive-text="" style="margin-left: 16px" />
-      <el-tooltip content="开启后，AI 会从知识库中检索相关文档来增强回答" placement="top">
-        <el-icon style="margin-left: 4px; color: #909399; cursor: help;"><QuestionFilled /></el-icon>
-      </el-tooltip>
-      <el-switch v-model="thinkingEnabled" active-text="深度思考" inactive-text="" style="margin-left: 16px" :disabled="!supportsThinking" />
-      <el-tooltip v-if="!supportsThinking" content="当前模型不支持深度思考" placement="top">
-        <el-icon style="margin-left: 4px; color: #909399; cursor: help;"><QuestionFilled /></el-icon>
-      </el-tooltip>
+      <div class="toolbar-left">
+        <el-select v-model="domain" placeholder="选择领域" style="width: 130px" size="default">
+          
+          <el-option label="Java" value="java" />
+          <el-option label="Python" value="python" />
+          <el-option label="AI/机器学习" value="ai" />
+          <el-option label="前端" value="frontend" />
+          <el-option label="数据库" value="database" />
+          <el-option label="系统设计" value="system" />
+        </el-select>
+        <el-select v-model="difficulty" placeholder="难度" style="width: 110px" size="default">
+          <el-option label="基础" value="基础" />
+          <el-option label="中级" value="中级" />
+          <el-option label="高级" value="高级" />
+        </el-select>
+        <div class="toolbar-divider"></div>
+        <div class="toolbar-switch">
+          <el-switch v-model="ragEnabled" active-text="知识库增强" inactive-text="" />
+          <el-tooltip content="开启后，AI 会从知识库中检索相关文档来增强回答" placement="top">
+            <el-icon class="switch-help"><QuestionFilled /></el-icon>
+          </el-tooltip>
+        </div>
+        <div class="toolbar-switch">
+          <el-switch v-model="thinkingEnabled" active-text="深度思考" inactive-text="" :disabled="!supportsThinking" />
+          <el-tooltip v-if="!supportsThinking" content="当前模型不支持深度思考" placement="top">
+            <el-icon class="switch-help"><QuestionFilled /></el-icon>
+          </el-tooltip>
+        </div>
+      </div>
     </div>
 
-    <!-- 消息列表 -->
     <div class="chat-messages" ref="messagesContainer" @scroll="handleScroll">
       <div v-if="messages.length === 0" class="empty-chat">
-        <el-icon :size="48" color="#409eff"><ChatDotRound /></el-icon>
-        <h3>面试智能助手</h3>
-        <p>输入你的问题，AI 为你生成面试题和知识点</p>
+        <div class="welcome-icon">
+          <svg viewBox="0 0 120 120" width="80" height="80">
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#409eff;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#67c23a;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="56" fill="url(#grad1)" opacity="0.1" />
+            <circle cx="60" cy="60" r="44" fill="url(#grad1)" opacity="0.15" />
+            <path d="M40 50 Q60 35 80 50 Q80 75 60 85 Q40 75 40 50Z" fill="url(#grad1)" opacity="0.6" />
+            <circle cx="52" cy="58" r="4" fill="white" />
+            <circle cx="68" cy="58" r="4" fill="white" />
+            <path d="M52 70 Q60 78 68 70" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" />
+          </svg>
+        </div>
+        <h2 class="welcome-title">面试智能助手</h2>
+        <p class="welcome-desc">基于 RAG 的智能面试辅导，为你生成面试题、解析知识点</p>
         <div class="quick-actions">
-          <el-button @click="sendQuickMessage('请生成3道Java基础面试题')">Java 基础题</el-button>
-          <el-button @click="sendQuickMessage('总结Java线程池的核心知识点')">线程池知识点</el-button>
-          <el-button @click="sendQuickMessage('Python常见面试题有哪些？')">Python 面试题</el-button>
+          <div class="quick-card" @click="sendQuickMessage('请生成3道Java基础面试题')">
+            <el-icon :size="20"><Document /></el-icon>
+            <span>Java 基础题</span>
+          </div>
+          <div class="quick-card" @click="sendQuickMessage('总结Java线程池的核心知识点')">
+            <el-icon :size="20"><Cpu /></el-icon>
+            <span>线程池知识点</span>
+          </div>
+          <div class="quick-card" @click="sendQuickMessage('HashMap的底层原理是什么？')">
+            <el-icon :size="20"><Key /></el-icon>
+            <span>HashMap 原理</span>
+          </div>
+          <div class="quick-card" @click="sendQuickMessage('Spring Boot自动装配的原理？')">
+            <el-icon :size="20"><SetUp /></el-icon>
+            <span>Spring Boot 原理</span>
+          </div>
         </div>
       </div>
 
       <div v-for="(msg, index) in messages" :key="index" :class="['message-item', msg.role]">
         <div class="message-avatar">
-          <el-avatar v-if="msg.role === 'user'" :icon="UserFilled" :size="36" />
-          <el-avatar v-else :icon="Monitor" :size="36" style="background: #409eff" />
+          <el-avatar v-if="msg.role === 'user'" :icon="UserFilled" :size="36" class="avatar-user" />
+          <el-avatar v-else :icon="Monitor" :size="36" class="avatar-ai" />
         </div>
         <div class="message-content">
-          <div class="message-role">{{ msg.role === 'user' ? '你' : 'AI助手' }}</div>
+          <div class="message-role">{{ msg.role === 'user' ? '你' : 'AI 助手' }}</div>
           <div class="message-text" :ref="el => setMessageRef(el, index)" v-html="msg.renderedHtml"></div>
         </div>
       </div>
 
       <div v-if="loading" class="message-item assistant">
-        <div class="message-avatar"><el-avatar :icon="Monitor" :size="36" style="background: #409eff" /></div>
+        <div class="message-avatar"><el-avatar :icon="Monitor" :size="36" class="avatar-ai" /></div>
         <div class="message-content">
-          <div class="message-role">AI助手</div>
-          <div class="message-text typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="message-role">AI 助手</div>
+          <div class="message-text typing-indicator">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 输入框 -->
-    <div class="chat-input">
-      <el-input v-model="inputMessage" type="textarea" :rows="2" placeholder="输入你的问题，例如：请生成3道Java中级面试题..." @keydown.enter.ctrl="sendMessage" :disabled="loading" />
-      <el-button type="primary" :icon="Promotion" circle size="large" @click="sendMessage" :loading="loading" style="margin-left: 12px; align-self: flex-end" />
+    <div class="chat-input-wrapper">
+      <div class="chat-input">
+        <el-input
+          v-model="inputMessage"
+          type="textarea"
+          :rows="2"
+          placeholder="输入你的问题，Ctrl+Enter 发送..."
+          @keydown.enter.ctrl="sendMessage"
+          :disabled="loading"
+          resize="none"
+        />
+        <el-button
+          type="primary"
+          :icon="Promotion"
+          circle
+          size="large"
+          @click="sendMessage"
+          :loading="loading"
+          class="send-btn"
+        />
+      </div>
+      <div class="input-hint">按 Ctrl+Enter 快速发送</div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, nextTick, inject, watch } from 'vue'
-import { UserFilled, Monitor, QuestionFilled, Promotion, ChatDotRound } from '@element-plus/icons-vue'
+import { UserFilled, Monitor, QuestionFilled, Promotion, Document, Cpu, Key, SetUp } from '@element-plus/icons-vue'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import request from '../utils/request'
 
-// ==================== Markdown 渲染器配置 ====================
 const md = new MarkdownIt({
   html: false,
   linkify: true,
@@ -89,8 +142,7 @@ const md = new MarkdownIt({
   }
 })
 
-// ==================== 状态管理 ====================
-const domain = ref('Java')
+const domain = ref('java')
 const difficulty = ref('中级')
 const ragEnabled = ref(false)
 const thinkingEnabled = ref(false)
@@ -112,10 +164,8 @@ const messagesContainer = ref(null)
 const currentSessionId = ref(null)
 const isUserAtBottom = ref(true)
 
-// 消息 DOM 引用（用于直接 innerHTML 操作）
 const messageRefs = ref({})
 
-// App.vue inject 共享状态
 const activeSessionId = inject('activeSessionId', ref(null))
 const loadSessions = inject('loadSessions', async () => {})
 const setActiveSession = inject('setActiveSession', (id) => {})
@@ -133,45 +183,26 @@ function setMessageRef(el, index) {
   else delete messageRefs.value[index]
 }
 
-// ==================== Markdown 渲染函数 ====================
-/**
- * 将原始 Markdown 文本渲染为 HTML
- *
- * 参考 ChatGPT / streaming-markdown 的策略：
- * - 流式输出时自动补全未关闭的代码块
- */
 function renderToHtml(text, streaming = false) {
   if (!text) return ''
-  // 清理 DeepSeek/Qwen 等模型的思考标签
   let cleaned = text.replace(/<think[\s\S]*?<\/think>/g, '').trim()
-
-  // 流式输出时补全未关闭的代码块（parseIncompleteMarkdown 思路）
   if (streaming && cleaned) {
     const codeBlocks = (cleaned.match(/```/g) || []).length
     if (codeBlocks % 2 !== 0) cleaned += '\n```'
   }
-
   return md.render(cleaned)
 }
 
-/**
- * 更新消息内容并同步渲染 HTML（双保险机制）
- */
 function updateMessageContent(msgIndex, content, streaming) {
   const msg = messages.value[msgIndex]
   const renderedHtml = renderToHtml(content, streaming)
-
-  // 1. Vue 响应式更新
   messages.value[msgIndex] = { ...msg, content, streaming, renderedHtml }
-
-  // 2. 直接 DOM 操作确保刷新
   nextTick(() => {
     const el = messageRefs.value[msgIndex]
     if (el && el.innerHTML !== renderedHtml) el.innerHTML = renderedHtml
   })
 }
 
-// ==================== 滚动控制 ====================
 function scrollToBottom(force = false) {
   nextTick(() => {
     if (messagesContainer.value && (force || isUserAtBottom.value)) {
@@ -186,7 +217,6 @@ function handleScroll() {
   isUserAtBottom.value = el.scrollHeight - el.scrollTop - el.clientHeight < 80
 }
 
-// ==================== 消息发送 ====================
 function sendQuickMessage(text) {
   inputMessage.value = text
   sendMessage()
@@ -221,8 +251,7 @@ async function sendMessage() {
   scrollToBottom(true)
 
   try {
-    if (ragEnabled.value) await streamRagChat(text)
-    else await streamChat(text)
+    await streamChat(text)
     await loadSessions()
   } catch (e) {
     console.error('对话错误', e)
@@ -233,28 +262,10 @@ async function sendMessage() {
   }
 }
 
-// ==================== SSE 流式读取（核心重写）====================
-
-/**
- * 从 buffer 中提取完整的 data: 行内容，返回 { content, remainingBuffer }
- *
- * 【关键改进】正确处理不完整的 data: 行：
- * - 只提取已完成的 data: xxx\n 行
- * - 未完成的部分保留在 remainingBuffer 中等待下一次数据到达
- * - 这就是之前文字丢失的根本原因 —— 之前的实现直接清空了整个 buffer!
- *
- * 后端格式示例（Spring WebFlux Flux<String>）:
- *   data: {"sessionId":"xxx"}\n
- *   data: 你好我是助手。\n
- *   data: ### 面试题解析\n
- *   data: **参考答案**\n
- */
 function extractSSEDatas(buffer) {
   let content = ''
   let remainingBuffer = ''
   const lines = buffer.split('\n')
-
-  // 检查 buffer 是否以换行结尾（判断最后一行是否完整）
   const endsWithNewline = buffer.endsWith('\n')
   const limit = endsWithNewline ? lines.length : lines.length - 1
 
@@ -277,7 +288,6 @@ function extractSSEDatas(buffer) {
       continue
     }
 
-    // 非空内容直接拼接（token 级别不加换行），空内容加换行（段落分隔）
     if (trimmed) content += trimmed
     else content += '\n'
   }
@@ -286,15 +296,6 @@ function extractSSEDatas(buffer) {
   return { content, remainingBuffer }
 }
 
-/**
- * 读取 SSE 流并实时渲染 Markdown
- *
- * 参考主流实现（CSDN 文章 / OpenAI SDK / Vercel AI SDK）的标准模式：
- * 1. 使用 TextDecoder 正确解码 UTF-8（stream 模式）
- * 2. 使用 buffer 缓存不完整的数据帧
- * 3. 只从 buffer 中提取完整的 data: 行，未完成部分保留
- * 4. 每收到有效数据就立即更新 UI
- */
 async function readSSEStream(response, msgIndex) {
   const reader = response.body.getReader()
   const decoder = new TextDecoder('utf-8')
@@ -305,13 +306,8 @@ async function readSSEStream(response, msgIndex) {
     const { done, value } = await reader.read()
     if (done) break
 
-    // 关键：使用 stream:true 让 TextDecoder 处理被切断的多字节 UTF-8 字符
     buffer += decoder.decode(value, { stream: true })
-
-    // 从 buffer 中提取完整的 data: 行内容
     const { content, remainingBuffer } = extractSSEDatas(buffer)
-
-    // 更新 buffer 为剩余未完成的部分
     buffer = remainingBuffer
 
     if (content) {
@@ -321,11 +317,8 @@ async function readSSEStream(response, msgIndex) {
     }
   }
 
-  // 流结束：用 stream:false 刷新 TextDecoder 内部缓冲区
-  // 并处理 buffer 中可能残留的最后一点数据
   buffer += decoder.decode(new Uint8Array(0), { stream: false })
   if (buffer) {
-    // 最后一次解析（此时不需要担心未完成行，直接全部取出）
     const finalParts = []
     for (const line of buffer.split('\n')) {
       if (!line.startsWith('data:')) continue
@@ -340,7 +333,6 @@ async function readSSEStream(response, msgIndex) {
     }
   }
 
-  // 最终渲染（streaming=false 确保代码块正确闭合）
   updateMessageContent(msgIndex, assistantContent, false)
   return assistantContent
 }
@@ -354,26 +346,8 @@ async function streamChat(text) {
   })
   if (currentSessionId.value) params.append('sessionId', currentSessionId.value)
 
-  const response = await fetch(`/api/chat/stream?${params.toString()}`)
-  if (!response.ok) throw new Error('请求失败')
-
-  messages.value.push({ role: 'assistant', content: '', streaming: false, renderedHtml: '' })
-  await readSSEStream(response, messages.value.length - 1)
-}
-
-async function streamRagChat(text) {
-  // RAG 模式：通过 Chat 接口 + ragEnabled=true，触发 Tool Calling
-  // LLM 会自主调用 KnowledgeSearchTool 检索知识库，然后用检索结果增强回答
-  const params = new URLSearchParams({
-    message: text,
-    domain: domain.value,
-    difficulty: difficulty.value,
-    ragEnabled: true,  // 关键：启用 RAG，后端会注册 KnowledgeSearchTool
-    thinkingEnabled: thinkingEnabled.value
-  })
-  if (currentSessionId.value) params.append('sessionId', currentSessionId.value)
-
-  const response = await fetch(`/api/chat/stream?${params.toString()}`)
+  const baseUrl = ragEnabled.value ? '/api/rag/chat/stream' : '/api/chat/stream'
+  const response = await fetch(`${baseUrl}?${params.toString()}`)
   if (!response.ok) throw new Error('请求失败')
 
   messages.value.push({ role: 'assistant', content: '', streaming: false, renderedHtml: '' })
@@ -386,86 +360,350 @@ async function streamRagChat(text) {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background: #f0f2f5;
 }
+
 .chat-toolbar {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
+  padding: 10px 24px;
   background: #fff;
-  border-bottom: 1px solid #ebeef5;
-  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  border-bottom: 1px solid #e8ecf0;
+  box-shadow: 0 1px 6px rgba(0,0,0,.04);
 }
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: #e0e0e0;
+  margin: 0 6px;
+}
+
+.toolbar-switch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.switch-help {
+  color: #909399;
+  cursor: help;
+  font-size: 14px;
+}
+
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 24px 0;
+  scroll-behavior: smooth;
 }
+
 .empty-chat {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #909399;
+  padding: 40px;
 }
-.empty-chat h3 { margin: 16px 0 8px; color: #303133; font-size: 20px; }
-.empty-chat p { margin-bottom: 24px; }
-.quick-actions { display: flex; gap: 12px; }
+
+.welcome-icon {
+  margin-bottom: 20px;
+  animation: floatUp 3s ease-in-out infinite;
+}
+
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.welcome-title {
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #409eff, #67c23a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+.welcome-desc {
+  color: #909399;
+  font-size: 15px;
+  margin-bottom: 32px;
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  max-width: 460px;
+  width: 100%;
+}
+
+.quick-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #fff;
+  border: 1px solid #e8ecf0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 14px;
+  color: #606266;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+
+.quick-card:hover {
+  border-color: #409eff;
+  color: #409eff;
+  box-shadow: 0 4px 12px rgba(64,158,255,.12);
+  transform: translateY(-2px);
+}
+
+.quick-card .el-icon {
+  color: #409eff;
+  flex-shrink: 0;
+}
 
 .message-item {
-  display: flex; gap: 12px; margin-bottom: 20px;
-  animation: fadeIn .3s ease;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 0 24px;
+  animation: msgFadeIn .35s ease;
 }
-.message-item.user { flex-direction: row-reverse; }
-.message-avatar { flex-shrink: 0; }
-.message-content { max-width: 70%; }
-.message-role { font-size: 12px; color: #909399; margin-bottom: 4px; }
-.message-item.user .message-role { text-align: right; }
+
+.message-item.user {
+  flex-direction: row-reverse;
+}
+
+.message-avatar {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.avatar-user {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+.avatar-ai {
+  background: linear-gradient(135deg, #409eff, #67c23a) !important;
+}
+
+.message-content {
+  max-width: 72%;
+  min-width: 0;
+}
+
+.message-role {
+  font-size: 12px;
+  color: #909399;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.message-item.user .message-role {
+  text-align: right;
+}
 
 .message-text {
-  background: #fff; padding: 12px 16px; border-radius: 12px;
-  font-size: 14px; line-height: 1.8;
-  box-shadow: 0 1px 3px rgba(0,0,0,.08);
-  word-wrap: break-word; overflow-wrap: break-word;
+  background: #fff;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border-top-left-radius: 4px;
+  font-size: 14px;
+  line-height: 1.75;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
-.message-item.user .message-text { background: #409eff; color: #fff; }
+
+.message-item.user .message-text {
+  background: linear-gradient(135deg, #409eff, #5b8def);
+  color: #fff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 4px;
+}
+
 .message-item.user .message-text :deep(pre),
-.message-item.user .message-text :deep(code) { background: rgba(255,255,255,.15); }
+.message-item.user .message-text :deep(code) {
+  background: rgba(255,255,255,.15);
+}
 
 .message-text :deep(pre) {
-  background: #f6f8fa; padding: 12px; border-radius: 6px;
-  overflow-x: auto; margin: 8px 0;
+  background: #1e1e2e;
+  padding: 16px;
+  border-radius: 10px;
+  overflow-x: auto;
+  margin: 10px 0;
+  position: relative;
 }
-.message-text :deep(code) { font-family: Menlo,Monaco,'Courier New',monospace; font-size: 13px; }
-.message-text :deep(h1), .message-text :deep(h2), .message-text :deep(h3) { margin: 12px 0 8px; }
-.message-text :deep(ul), .message-text :deep(ol) { padding-left: 20px; }
-.message-text :deep(p) { margin: 6px 0; }
-.message-text :deep(table) { border-collapse: collapse; width: 100%; margin: 8px 0; }
-.message-text :deep(th), .message-text :deep(td) { border: 1px solid #dcdfe6; padding: 8px 12px; text-align: left; }
-.message-text :deep(th) { background: #f5f7fa; }
+
+.message-text :deep(pre.hljs) {
+  background: #1e1e2e;
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.message-text :deep(pre code) {
+  font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
+  font-size: 13px;
+  color: #cdd6f4;
+  line-height: 1.6;
+}
+
+.message-text :deep(code) {
+  font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
+  font-size: 13px;
+  background: #f0f2f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #e74c3c;
+}
+
+.message-text :deep(h1),
+.message-text :deep(h2),
+.message-text :deep(h3) {
+  margin: 14px 0 8px;
+  color: #303133;
+}
+
+.message-text :deep(h1) { font-size: 18px; }
+.message-text :deep(h2) { font-size: 16px; }
+.message-text :deep(h3) { font-size: 15px; }
+
+.message-text :deep(ul),
+.message-text :deep(ol) {
+  padding-left: 22px;
+  margin: 6px 0;
+}
+
+.message-text :deep(li) {
+  margin: 4px 0;
+  line-height: 1.7;
+}
+
+.message-text :deep(p) {
+  margin: 6px 0;
+}
+
+.message-text :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.message-text :deep(th),
+.message-text :deep(td) {
+  border: 1px solid #e8ecf0;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 13px;
+}
+
+.message-text :deep(th) {
+  background: #f5f7fa;
+  font-weight: 600;
+}
+
 .message-text :deep(blockquote) {
-  border-left: 4px solid #409eff; padding: 8px 16px; margin: 8px 0;
-  background: #f0f7ff; color: #606266;
+  border-left: 4px solid #409eff;
+  padding: 10px 16px;
+  margin: 10px 0;
+  background: #f0f7ff;
+  color: #606266;
+  border-radius: 0 8px 8px 0;
 }
 
-.typing { display: flex; gap: 4px; padding: 16px; }
-.typing .dot {
-  width: 8px; height: 8px; background: #c0c4cc; border-radius: 50%;
-  animation: typingDot 1.4s infinite ease-in-out;
+.message-text :deep(strong) {
+  color: #303133;
+  font-weight: 600;
 }
-.typing .dot:nth-child(2) { animation-delay: .2s; }
-.typing .dot:nth-child(3) { animation-delay: .4s; }
 
-@keyframes typingDot {
-  0%,80%,100% { transform: scale(.6); opacity: .4; }
+.typing-indicator {
+  display: flex;
+  gap: 5px;
+  padding: 18px;
+  align-items: center;
+}
+
+.typing-indicator .dot {
+  width: 8px;
+  height: 8px;
+  background: #409eff;
+  border-radius: 50%;
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-indicator .dot:nth-child(2) { animation-delay: .2s; }
+.typing-indicator .dot:nth-child(3) { animation-delay: .4s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: scale(.5); opacity: .4; }
   40% { transform: scale(1); opacity: 1; }
 }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+@keyframes msgFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-input-wrapper {
+  background: #fff;
+  border-top: 1px solid #e8ecf0;
+  padding: 16px 24px 12px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,.03);
+}
 
 .chat-input {
-  display: flex; align-items: end; padding: 16px 20px;
-  background: #fff; border-top: 1px solid #ebeef5;
-  box-shadow: 0 -1px 4px rgba(0,0,0,.05);
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  max-width: 860px;
+  margin: 0 auto;
 }
-.chat-input :deep(.el-textarea__inner) { resize: none; }
+
+.chat-input :deep(.el-textarea__inner) {
+  resize: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  border: 1px solid #e0e0e0;
+  transition: border-color .2s;
+}
+
+.chat-input :deep(.el-textarea__inner):focus {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64,158,255,.1);
+}
+
+.send-btn {
+  flex-shrink: 0;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  transition: all .2s;
+}
+
+.send-btn:hover {
+  transform: scale(1.05);
+}
+
+.input-hint {
+  text-align: center;
+  font-size: 12px;
+  color: #c0c4cc;
+  margin-top: 6px;
+}
 </style>

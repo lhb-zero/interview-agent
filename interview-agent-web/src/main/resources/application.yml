@@ -53,7 +53,6 @@ mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   # 逻辑删除仅在 @TableLogic 注解的实体字段上生效，不全局配置
   # 避免影响没有 status 字段的表（chat_session、chat_message 等）
 
@@ -73,6 +72,6 @@ knife4j:
 logging:
   level:
     com.interview.agent: DEBUG
-    org.springframework.ai.ollama: DEBUG
-    org.springframework.ai.chat.client: DEBUG
-    org.springframework.ai.vectorstore: DEBUG
+    org.springframework.ai.ollama: WARN
+    org.springframework.ai.chat.client: WARN
+    org.springframework.ai.vectorstore: WARN

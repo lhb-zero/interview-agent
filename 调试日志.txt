@@ -1,23 +1,444 @@
- 分块 1/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='Java并发编程面试题                                       '
- 分块 2/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='ThreadLocal：用途、底层                   ThreadLocalMap'
- 分块 3/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='先想个场景：两个线程同时操作一个变量，比如线程                           '
- 分块 4/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='排，最终保证多线程操作共享变量时能正确交互。理解这些，就能明白为啥写并发代码时要用这        '
- 分块 5/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='使用    Java   多线程需要注意以下几点：                         '
- 分块 6/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='使用多线程要注意哪些问题？                                     '
- 分块 7/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='线程的创建方式有哪些?                                       '
- 分块 8/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='public    static    void   main(String[]      args'
- 分块 9/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='采用实现Callable接口方式：                                 '
- 分块 10/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='java                                              '
- 分块 11/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='源自《Java并发编程艺术》                      java.lang.Thre'
- 分块 12/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='特性                            sleep()             '
- 分块 13/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='sleep()     不会释放线程已持有的任何锁（如                       '
- 分块 14/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='触发条件:线程进入BLOCKED状态通常是因为试图获取一个对象的锁（monitor         '
- 分块 15/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='wait    状态下的线程如何进行恢复到                             '
- 分块 16/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='JVM有很多实现，比较流行的就是hotspot，hotspot对notofy()的实现并不是我们以为'
- 分块 17/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='生产者线程在睡眠                 2 秒后将         flag    设置为'
- 分块 18/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='}                                                 '
- 分块 19/101 向量存储失败: PreparedStatementCallback; bad SQL grammar [INSERT INTO public.vector_store (id, content, metadata, embedding) VALUES (?, ?, ?::jsonb, ?) ON CONFLICT (id) DO UPDATE SET content = ? , metadata = ?::jsonb , embedding = ? ] | content='System.out.println("Consumer:             Waiting '
- ······
- 向量存储全部失败: 共 101 个分块，0 个成功
- 业务异常: code=5002, message=文档解析失败
- Resolved [com.interview.agent.common.exception.BusinessException: 文档解析失败]
+23:15:45.994  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 向量检索: 
+query='请用自己的话解释一下什么是多态', domain='java', topK=5, threshold=0.5
+23:15:50.642  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 检索完成: 
+命中 2 条文档
+23:15:50.643  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[0]: domain=java, title=Java基础面试题-小林coding, distance=0.3635541, length=4056, preview='2026/3/3  00:25                                            Java基础面试题     |  小
+林coding |  Java面试学习    '
+23:15:50.643 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[0] 完
+整内容:
+2026/3/3  00:25                                            Java基础面试题     |  小林
+coding |  Java面试学习
+
+
+          多态解决了什么问题？
+
+
+
+          多态是指子类可以替换父类，在实际的代码运行过程中，调用子类的方法实现。多态 
+这种特性也
+
+
+          需要编程语言提供特殊的语法机制来实现，比如继承、接口类。
+
+
+
+          多态可以提高代码的扩展性和复用性，是很多设计模式、设计原则、编程技巧的代码 
+实现基础。
+
+
+          比如策略模式、基于接口而非实现编程、依赖倒置原则、里式替换原则、利用多态去 
+掉冗长的
+     if-
+          else  语句等等
+
+
+
+          面向对象的设计原则你知道有哪些吗
+
+
+
+          面向对象编程中的六大原则：
+
+
+
+             单一职责原则（SRP）                 ：一个类应该只有一个引起它变化的原因
+，即一个类应该只负责一项职
+
+
+             责。例子：考虑一个员工类，它应该只负责管理员工信息，而不应负责其他无关工
+作。
+
+
+             开放封闭原则（OCP）                  ：软件实体应该对扩展开放，对修改封 
+闭。例子：通过制定接口来实现这
+
+
+             一原则，比如定义一个图形类，然后让不同类型的图形继承这个类，而不需要修改
+图形类本
+
+
+             身。
+
+
+
+             里氏替换原则（LSP）                 ：子类对象应该能够替换掉所有父类对象
+。例子：一个正方形是一个矩
+
+
+             形，但如果修改一个矩形的高度和宽度时，正方形的行为应该如何改变就是一个违
+反里氏替换
+
+
+             原则的例子。
+
+
+
+             接口隔离原则（ISP）                ：客户端不应该依赖那些它不需要的接口 
+，即接口应该小而专。例子：通
+
+
+             过接口抽象层来实现底层和高层模块之间的解耦，比如使用依赖注入。
+
+
+
+             依赖倒置原则（DIP）                 ：高层模块不应该依赖低层模块，二者都
+应该依赖于抽象；抽象不应该依
+23:15:50.648  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[1]: domain=java, title=Java基础面试题-小林coding, distance=0.38178578, length=5301, preview='2026/3/3  00:25                                            Java基础面试题     |   
+小林coding |  Java面试学习    '
+23:15:50.649 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[1] 完
+整内容:
+2026/3/3  00:25                                            Java基础面试题     |  小林
+coding |  Java面试学习
+
+
+          的功能，具有灵活性和可扩展性，通过封装和继承可以更好地应对需求变化。       
+
+
+
+          Java面向对象的三大特性包括：封装、继承、多态：
+
+
+
+             封装：封装是指将对象的属性（数据）和行为（方法）结合在一起，对外隐藏对象
+的内部细
+
+
+             节，仅通过对象提供的接口与外界交互。封装的目的是增强安全性和简化编程，使
+得对象更加
+
+
+             独立。
+
+
+
+             继承：继承是一种可以使得子类自动共享父类数据结构和方法的机制。它是代码复
+用的重要手
+
+
+             段，通过继承可以建立类与类之间的层次关系，使得结构更加清晰。
+
+
+
+             多态：多态是指允许不同类的对象对同一消息作出响应。即同一个接口，使用不同
+的实例而执
+
+
+             行不同操作。多态性可以分为编译时多态（重载）和运行时多态（重写）        
+                                                       。它使得程序具有良好
+
+
+             的灵活性和扩展性。
+
+
+
+          多态体现在哪几个方面？
+
+
+
+          多态在面向对象编程中可以体现在以下几个方面：
+
+
+
+             方法重载：
+
+
+
+                 方法重载是指同一类中可以有多个同名方法，它们具有不同的参数列表（参数
+类型、数量或
+
+
+                 顺序不同）        。虽然方法名相同，但根据传入的参数不同，编译器会在
+编译时确定调用哪个方
+
+
+                 法。
+
+
+
+                 示例：对于一个                add    方法，可以定义为
+   add(int    a,  int   b)   和    add(double      a,  double
+
+
+                 b)  。
+
+
+
+             方法重写：
+
+
+
+                 方法重写是指子类能够提供对父类中同名方法的具体实现。在运行时，JVM会 
+根据对象的实
+
+
+                 际类型确定调用哪个版本的方法。这是实现多态的主要方式。
+
+
+
+                 示例：在一个动物类中，定义一个                                sound 
+    方法，子类            Dog    可以重写该方法以实现
+
+
+                  bark   ，而       Cat   可以实现           meow   。
+
+
+
+             接口与实现：
+
+
+
+                 多态也体现在接口的使用上，多个类可以实现同一个接口，并且用接口类型的
+引用来调用这
+23:15:50.780 DEBUG c.i.a.d.m.ChatMessageMapper.selectList   : ==>  Preparing: SELECT 
+id,session_id,role,content,tokens_used,created_at FROM chat_message WHERE (session_id = ?) ORDER BY created_at ASC LIMIT 20
+23:15:50.781 DEBUG c.i.a.d.m.ChatMessageMapper.selectList   : ==> Parameters: 7391088c64eb4dde98cb138bfe3d366f(String)
+23:15:50.793 DEBUG c.i.a.d.m.ChatMessageMapper.selectList   : <==      Total: 0      
+23:15:50.801  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Prompt] 构建完成: 
+model=qwen3:1.7b, similarDocs=2, contextLength=9442, historyCount=0, totalMessages=2, userMessage='请用自己的话解释一下什么是多态'
+23:15:50.802 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Prompt] RAG上下文 
+内容:
+【来源: java / Java基础面试题-小林coding - 第28段】
+2026/3/3  00:25                                            Java基础面试题     |  小林
+coding |  Java面试学习
+
+
+          多态解决了什么问题？
+
+
+
+          多态是指子类可以替换父类，在实际的代码运行过程中，调用子类的方法实现。多态 
+这种特性也
+
+
+          需要编程语言提供特殊的语法机制来实现，比如继承、接口类。
+
+
+
+          多态可以提高代码的扩展性和复用性，是很多设计模式、设计原则、编程技巧的代码 
+实现基础。
+
+
+          比如策略模式、基于接口而非实现编程、依赖倒置原则、里式替换原则、利用多态去 
+掉冗长的
+     if-
+          else  语句等等
+
+
+
+          面向对象的设计原则你知道有哪些吗
+
+
+
+          面向对象编程中的六大原则：
+
+
+
+             单一职责原则（SRP）                 ：一个类应该只有一个引起它变化的原因
+，即一个类应该只负责一项职
+
+
+             责。例子：考虑一个员工类，它应该只负责管理员工信息，而不应负责其他无关工
+作。
+
+
+             开放封闭原则（OCP）                  ：软件实体应该对扩展开放，对修改封 
+闭。例子：通过制定接口来实现这
+
+
+             一原则，比如定义一个图形类，然后让不同类型的图形继承这个类，而不需要修改
+图形类本
+
+
+             身。
+
+
+
+             里氏替换原则（LSP）                 ：子类对象应该能够替换掉所有父类对象
+。例子：一个正方形是一个矩
+
+
+             形，但如果修改一个矩形的高度和宽度时，正方形的行为应该如何改变就是一个违
+反里氏替换
+
+
+             原则的例子。
+
+
+
+             接口隔离原则（ISP）                ：客户端不应该依赖那些它不需要的接口 
+，即接口应该小而专。例子：通
+
+
+             过接口抽象层来实现底层和高层模块之间的解耦，比如使用依赖注入。
+
+
+
+             依赖倒置原则（DIP）                 ：高层模块不应该依赖低层模块，二者都
+应该依赖于抽象；抽象不应该依
+
+---
+
+【来源: java / Java基础面试题-小林coding - 第26段】
+2026/3/3  00:25                                            Java基础面试题     |  小林
+coding |  Java面试学习
+
+
+          的功能，具有灵活性和可扩展性，通过封装和继承可以更好地应对需求变化。       
+
+
+
+          Java面向对象的三大特性包括：封装、继承、多态：
+
+
+
+             封装：封装是指将对象的属性（数据）和行为（方法）结合在一起，对外隐藏对象
+的内部细
+
+
+             节，仅通过对象提供的接口与外界交互。封装的目的是增强安全性和简化编程，使
+得对象更加
+
+
+             独立。
+
+
+
+             继承：继承是一种可以使得子类自动共享父类数据结构和方法的机制。它是代码复
+用的重要手
+
+
+             段，通过继承可以建立类与类之间的层次关系，使得结构更加清晰。
+
+
+
+             多态：多态是指允许不同类的对象对同一消息作出响应。即同一个接口，使用不同
+的实例而执
+
+
+             行不同操作。多态性可以分为编译时多态（重载）和运行时多态（重写）        
+                                                       。它使得程序具有良好
+
+
+             的灵活性和扩展性。
+
+
+
+          多态体现在哪几个方面？
+
+
+
+          多态在面向对象编程中可以体现在以下几个方面：
+
+
+
+             方法重载：
+
+
+
+                 方法重载是指同一类中可以有多个同名方法，它们具有不同的参数列表（参数
+类型、数量或
+
+
+                 顺序不同）        。虽然方法名相同，但根据传入的参数不同，编译器会在
+编译时确定调用哪个方
+
+
+                 法。
+
+
+
+                 示例：对于一个                add    方法，可以定义为
+   add(int    a,  int   b)   和    add(double      a,  double
+
+
+                 b)  。
+
+
+
+             方法重写：
+
+
+
+                 方法重写是指子类能够提供对父类中同名方法的具体实现。在运行时，JVM会 
+根据对象的实
+
+
+                 际类型确定调用哪个版本的方法。这是实现多态的主要方式。
+
+
+
+                 示例：在一个动物类中，定义一个                                sound 
+    方法，子类            Dog    可以重写该方法以实现
+
+
+                  bark   ，而       Cat   可以实现           meow   。
+
+
+
+             接口与实现：
+
+
+
+                 多态也体现在接口的使用上，多个类可以实现同一个接口，并且用接口类型的
+引用来调用这
+23:15:50.810 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Prompt] System Prompt内容:
+你是一位专业的面试智能助手。请根据以下检索到的参考资料来回答用户的问题。
+
+要求：
+1. 优先基于参考资料回答，不要编造参考资料中没有的内容
+2. 如果参考资料不足以完整回答，可以补充你的知识，但必须明确标注"【补充】"
+3. 引用参考资料时，使用上下文中【来源: 领域 / 文档标题 - 第N段】的格式标注出处，不要 
+编造来源
+4. 回答使用中文，结构清晰，使用 Markdown 格式
+5. 如果参考资料与问题无关，说明未找到相关资料，基于自身知识回答
+
+参考资料：
+<context>
+
+用户问题：<question>
+
+23:15:50.814 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==>  Preparing: INSERT 
+INTO chat_message ( session_id, role, content, created_at ) VALUES ( ?, ?, ?, ? )    
+23:15:50.814 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==> Parameters: 7391088c64eb4dde98cb138bfe3d366f(String), user(String), 请用自己的话解释一下什么是多态(String), 2026-04-24T23:15:50.813907(LocalDateTime)
+23:15:50.819 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : <==    Updates: 1
+23:15:55.954 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==>  Preparing: INSERT 
+INTO chat_message ( session_id, role, content, created_at ) VALUES ( ?, ?, ?, ? )    
+23:15:55.955 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==> Parameters: 7391088c64eb4dde98cb138bfe3d366f(String), assistant(String), 多态（Polymorphism）是面向对象 
+编程中的一个核心概念，指的是同一个接口或抽象类型可以具有多种不同的实现方式。简单来说 
+，多态允许不同的对象对同一操作具有不同的处理方式，从而实现灵活和扩展性的编程。       
+
+在编程中，多态通常分为两种形式：
+
+1. **编译时多态（Compile-time Polymorphism）**：也称为静态多态，通过方法重载（Overloading）实现。同一方法名在不同参数情况下有不同实现，例如在Java中，多个方法具有相同名称 
+但不同参数列表的情况。
+
+2. **运行时多态（Run-time Polymorphism）**：也称为动态多态，通过接口或抽象类实现。例 
+如在Java中，子类实现接口中的方法，调用时根据实际对象类型进行不同的处理。
+
+【补充】多态在实际应用中可以提高代码的灵活性和可维护性，使得代码更加通用和易于扩展。 
+例如，在面向对象编程中，多态常用于实现接口或抽象类，使得不同类可以实现相同的方法，从 
+而统一调用方式。(String), 2026-04-24T23:15:55.951498300(LocalDateTime)
+23:15:55.959 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : <==    Updates: 1      
+23:15:55.960  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Stream] LLM流式响 
+应完成: sessionId=7391088c64eb4dde98cb138bfe3d366f, 响应长度=431
+23:15:55.960 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Stream] LLM流式响 
+应内容:
+多态（Polymorphism）是面向对象编程中的一个核心概念，指的是同一个接口或抽象类型可以具 
+有多种不同的实现方式。简单来说，多态允许不同的对象对同一操作具有不同的处理方式，从而 
+实现灵活和扩展性的编程。
+
+在编程中，多态通常分为两种形式：
+
+1. **编译时多态（Compile-time Polymorphism）**：也称为静态多态，通过方法重载（Overloading）实现。同一方法名在不同参数情况下有不同实现，例如在Java中，多个方法具有相同名称 
+但不同参数列表的情况。
+
+2. **运行时多态（Run-time Polymorphism）**：也称为动态多态，通过接口或抽象类实现。例 
+如在Java中，子类实现接口中的方法，调用时根据实际对象类型进行不同的处理。
+
+【补充】多态在实际应用中可以提高代码的灵活性和可维护性，使得代码更加通用和易于扩展。 
+例如，在面向对象编程中，多态常用于实现接口或抽象类，使得不同类可以实现相同的方法，从 
+而统一调用方式。
+23:15:55.999 DEBUG c.i.a.d.m.ChatSessionMapper.selectList   : ==>  Preparing: SELECT 
+id,session_id,title,domain,model_name,created_at FROM chat_session ORDER BY created_at DESC
+23:15:55.999 DEBUG c.i.a.d.m.ChatSessionMapper.selectList   : ==> Parameters: 
+23:15:56.006 DEBUG c.i.a.d.m.ChatSessionMapper.selectList   : <==      Total: 15     

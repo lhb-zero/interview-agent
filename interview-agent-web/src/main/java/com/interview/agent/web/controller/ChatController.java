@@ -8,6 +8,7 @@ import com.interview.agent.service.chat.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -19,6 +20,7 @@ import java.util.Map;
  * 对话控制器
  */
 @Tag(name = "对话管理", description = "面试对话相关接口")
+@Slf4j
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
@@ -35,7 +37,10 @@ public class ChatController {
     @Operation(summary = "流式对话（SSE）")
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> chatStream(ChatRequestDTO request) {
-        // 先获取或创建 sessionId，确保前端能第一时间拿到
+        log.info("[ChatStream] 收到请求: ragEnabled={}, thinkingEnabled={}, domain={}, message={}",
+                request.getRagEnabled(), request.getThinkingEnabled(), request.getDomain(),
+                request.getMessage() != null && request.getMessage().length() > 30
+                        ? request.getMessage().substring(0, 30) + "..." : request.getMessage());
         String sessionId = chatService.resolveSessionId(request);
         // 将 sessionId 回写到 request 中，避免 chatStream 内部重复创建
         request.setSessionId(sessionId);

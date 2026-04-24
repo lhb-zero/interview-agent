@@ -12,6 +12,8 @@ import com.interview.agent.model.entity.ChatSession;
 import com.interview.agent.model.entity.KnowledgeDocument;
 import com.interview.agent.model.vo.ChatMessageVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.interview.agent.service.rag.transformer.DocumentTextCleaner;
+import com.interview.agent.service.rag.transformer.SmartTextSplitter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -24,13 +26,14 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.TextReader;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
+import org.springframework.ai.reader.pdf.ParagraphPdfDocumentReader;
 import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.ollama.api.OllamaChatOptions;
-import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -43,10 +46,12 @@ import java.util.stream.Collectors;
  * RAG 服务实现
  *
  * 面试亮点：
- * 1. 文档导入全链路：文件解析 → Chunking → Embedding → PGVector 存储
- * 2. 多格式支持：PDF (PagePdfDocumentReader)、Markdown (TextReader)、TXT (TextReader)
- * 3. RAG 检索增强：问题向量化 → 相似度检索 → Prompt 拼接 → LLM 生成
- * 4. 相似度阈值过滤：低于阈值的文档片段不参与增强，避免噪声
+ * 1. 文档导入全链路：文件解析 → 文本清洗 → 智能分块 → Embedding → PGVector 存储
+ * 2. 多格式支持：PDF (ParagraphPdf/PagePdf)、Markdown (TextReader)、TXT (TextReader)
+ * 3. 文本清洗优化：DocumentTextCleaner 去页眉页脚、空行、噪声、PDF 断行修复
+ * 4. 智能分块优化：SmartTextSplitter 段落优先 + 重叠窗口 + 中文感知
+ * 5. RAG 检索增强：问题向量化 → 相似度检索 → Prompt 拼接 → LLM 生成
+ * 6. 相似度阈值过滤：低于阈值的文档片段不参与增强，避免噪声
  */
 @Slf4j
 @Service
@@ -55,10 +60,12 @@ public class RagServiceImpl implements RagService {
 
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
-    private final TokenTextSplitter tokenTextSplitter;
+    private final SmartTextSplitter smartTextSplitter;
+    private final DocumentTextCleaner documentTextCleaner;
     private final KnowledgeDocumentMapper documentMapper;
     private final ChatSessionMapper sessionMapper;
     private final ChatMessageMapper messageMapper;
+    private final JdbcTemplate jdbcTemplate;
 
     @Value("classpath:/prompts/rag-enhanced-answer.st")
     private Resource ragPromptResource;
@@ -148,16 +155,18 @@ public class RagServiceImpl implements RagService {
      *
      * 核心流程（面试必背）：
      * ① 文件解析 — 根据文件后缀选择对应的 DocumentReader
-     * ② 文本分块 (Chunking) — TokenTextSplitter 按 Token 数分段
-     * ③ 向量化 (Embedding) — bge-m3 将文本转为 1024 维向量
-     * ④ 存储 (VectorStore) — 向量 + 元数据写入 PGVector
-     * ⑤ 记录 (RDBMS) — knowledge_document 表记录文档元信息
+     * ② 文本清洗 — DocumentTextCleaner 去除页眉页脚、空行、噪声
+     * ③ 文本分块 (Chunking) — SmartTextSplitter 段落优先 + 重叠窗口
+     * ④ 向量化 (Embedding) — bge-m3 将文本转为 1024 维向量
+     * ⑤ 存储 (VectorStore) — 向量 + 元数据写入 PGVector
+     * ⑥ 记录 (RDBMS) — knowledge_document 表记录文档元信息
      */
     public void importDocument(String filePath, String domain, String title, String fileType) {
         try {
             // 识别文件类型
             String actualFileType = fileType != null ? fileType : detectFileType(filePath);
-            log.info("开始导入文档: filePath={}, domain={}, title={}, fileType={}", filePath, domain, title, actualFileType);
+            String normalizedDomain = domain != null ? domain.toLowerCase() : "java";
+            log.info("开始导入文档: filePath={}, domain={}, title={}, fileType={}", filePath, normalizedDomain, title, actualFileType);
 
             // ① 根据文件类型选择 Reader 解析文档
             List<Document> documents = parseDocument(filePath, actualFileType);
@@ -167,13 +176,20 @@ public class RagServiceImpl implements RagService {
                 throw new BusinessException(ResultCode.DOCUMENT_PARSE_ERROR);
             }
 
-            // ② 文本分块 (Chunking)
-            List<Document> chunks = tokenTextSplitter.apply(documents);
-            log.info("文本分块完成: 共 {} 个分块（分块前）", chunks.size());
+            // ② 文本清洗 — 去除页眉页脚、空行、噪声、PDF 断行修复
+            List<Document> cleanedDocs = documentTextCleaner.apply(documents);
+            log.info("文本清洗完成: 保留 {} 个有效文档段（清洗前 {}）", cleanedDocs.size(), documents.size());
 
-            // ③ 过滤过短的分块（bge-m3 对过短文本会返回 NaN 向量，导致 Ollama 报 500）
-            // 面试亮点：这是 RAG 生产环境常见坑 —— 空内容/极短内容的 Embedding 不可靠
-            int minChunkLength = 20;  // 低于 20 字符的块大概率无语义价值
+            if (cleanedDocs.isEmpty()) {
+                throw new BusinessException(ResultCode.DOCUMENT_PARSE_ERROR);
+            }
+
+            // ③ 文本分块 (Chunking) — 段落优先 + 重叠窗口
+            List<Document> chunks = smartTextSplitter.apply(cleanedDocs);
+            log.info("文本分块完成: 共 {} 个分块", chunks.size());
+
+            // ④ 过滤过短的分块（bge-m3 对过短文本会返回 NaN 向量，导致 Ollama 报 500）
+            int minChunkLength = 20;
             List<Document> validChunks = new ArrayList<>();
             for (Document chunk : chunks) {
                 String text = chunk.getText();
@@ -191,19 +207,32 @@ public class RagServiceImpl implements RagService {
                 throw new BusinessException(ResultCode.DOCUMENT_PARSE_ERROR);
             }
 
-            // ④ 为每个块添加元数据
+            // ⑤ 先保存文档记录到关系数据库，获取自增 ID（用于关联向量数据）
+            KnowledgeDocument doc = new KnowledgeDocument();
+            doc.setTitle(title);
+            doc.setDomain(normalizedDomain);
+            doc.setFileType(actualFileType);
+            doc.setFilePath(filePath);
+            doc.setChunkCount(0);
+            doc.setStatus("ACTIVE");
+            doc.setCreatedAt(LocalDateTime.now());
+            doc.setUpdatedAt(LocalDateTime.now());
+            documentMapper.insert(doc);
+            Long docId = doc.getId();
+            log.info("文档记录已创建: docId={}, title={}", docId, title);
+
+            // ⑥ 为每个块添加元数据（包含 doc_id，用于删除时关联清理）
             for (int i = 0; i < validChunks.size(); i++) {
                 Document chunk = validChunks.get(i);
-                chunk.getMetadata().put("domain", domain);
+                chunk.getMetadata().put("doc_id", docId);
+                chunk.getMetadata().put("domain", normalizedDomain);
                 chunk.getMetadata().put("title", title);
                 chunk.getMetadata().put("file_type", actualFileType);
                 chunk.getMetadata().put("chunk_index", i);
                 chunk.getMetadata().put("total_chunks", validChunks.size());
             }
 
-            // ⑤ 逐条存入向量数据库
-            // 面试亮点：Ollama 0.21.0 的 /api/embed 批量接口有 NaN bug，逐条调用更稳定
-            // 生产环境中 Embedding 导入要：逐条 + 重试 + 统计实际成功数
+            // ⑦ 逐条存入向量数据库
             int successCount = 0;
             int failCount = 0;
             for (int i = 0; i < validChunks.size(); i++) {
@@ -227,7 +256,7 @@ public class RagServiceImpl implements RagService {
                 }
             }
 
-            // ⑥ 判断实际入库结果
+            // ⑧ 判断实际入库结果
             if (successCount == 0) {
                 log.error("向量存储全部失败: 共 {} 个分块，0 个成功", validChunks.size());
                 throw new BusinessException(ResultCode.VECTOR_STORE_ERROR);
@@ -237,20 +266,13 @@ public class RagServiceImpl implements RagService {
             }
             log.info("向量存储完成: 成功 {}/{} 个分块已写入 PGVector", successCount, validChunks.size());
 
-            // ⑦ 保存文档记录到关系数据库（记录实际成功数）
-            KnowledgeDocument doc = new KnowledgeDocument();
-            doc.setTitle(title);
-            doc.setDomain(domain);
-            doc.setFileType(actualFileType);
-            doc.setFilePath(filePath);
-            doc.setChunkCount(successCount);  // 记录实际成功入库的分块数
-            doc.setStatus("ACTIVE");
-            doc.setCreatedAt(LocalDateTime.now());
+            // ⑨ 更新文档记录的实际成功分块数
+            doc.setChunkCount(successCount);
             doc.setUpdatedAt(LocalDateTime.now());
-            documentMapper.insert(doc);
+            documentMapper.updateById(doc);
 
-            log.info("文档导入成功: title={}, domain={}, fileType={}, 成功chunks={}, 失败chunks={}",
-                    title, domain, actualFileType, successCount, failCount);
+            log.info("文档导入成功: docId={}, title={}, domain={}, fileType={}, 成功chunks={}, 失败chunks={}",
+                    docId, title, normalizedDomain, actualFileType, successCount, failCount);
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
@@ -265,11 +287,42 @@ public class RagServiceImpl implements RagService {
         if (doc == null) {
             throw new BusinessException(ResultCode.NOT_FOUND);
         }
-        doc.setStatus("DELETED");
-        doc.setUpdatedAt(LocalDateTime.now());
-        documentMapper.updateById(doc);
-        log.info("文档已标记删除: id={}", documentId);
-        // 注意：PGVector 中的向量数据未删除，后续可通过 doc_id 元数据批量清理
+
+        // ① 清理 PGVector 中的向量数据
+        deleteVectorsByDocId(documentId);
+
+        // ② 逻辑删除文档（@TableLogic 会自动将 status 设为 DELETED）
+        documentMapper.deleteById(documentId);
+        log.info("文档已标记删除: id={}, title={}", documentId, doc.getTitle());
+    }
+
+    /**
+     * 根据 doc_id 元数据清理 PGVector 中的向量数据
+     *
+     * 面试亮点：RAG 系统中"删文档"必须同步清理向量数据，否则：
+     * 1. 向量空间膨胀，检索性能下降
+     * 2. 已删除文档的内容仍可能被检索到，产生"幽灵回答"
+     * 3. 存储资源浪费
+     *
+     * 实现方式：通过 JdbcTemplate 查询 vector_store 表中 metadata->>'doc_id' 匹配的记录 ID，
+     * 再调用 VectorStore.delete() 批量删除
+     */
+    private void deleteVectorsByDocId(Long docId) {
+        try {
+            int deleted = jdbcTemplate.update(
+                    "DELETE FROM vector_store WHERE metadata->>'doc_id' = ?",
+                    String.valueOf(docId)
+            );
+
+            if (deleted == 0) {
+                log.warn("未找到 doc_id={} 对应的向量数据，可能为旧数据（无 doc_id 元数据）", docId);
+                return;
+            }
+
+            log.info("PGVector 向量数据已清理: docId={}, 删除向量数={}", docId, deleted);
+        } catch (Exception e) {
+            log.error("清理 PGVector 向量数据失败: docId={}, 将继续标记文档删除", docId, e);
+        }
     }
 
     @Override
@@ -291,15 +344,19 @@ public class RagServiceImpl implements RagService {
 
         return switch (fileType.toLowerCase()) {
             case "pdf" -> {
-                // PDF 按页解析，每 1 页为一个 Document
+                List<Document> result = tryParagraphPdfReader(resource);
+                if (result != null && !result.isEmpty()) {
+                    log.info("[PDF] 使用 ParagraphPdfDocumentReader 解析成功: {} 段", result.size());
+                    yield result;
+                }
+                log.info("[PDF] ParagraphPdfDocumentReader 无结果，降级为 PagePdfDocumentReader");
                 PdfDocumentReaderConfig config = PdfDocumentReaderConfig.builder()
-                        .withPagesPerDocument(1)  // 每页作为一个独立文档段
+                        .withPagesPerDocument(1)
                         .build();
                 PagePdfDocumentReader pdfReader = new PagePdfDocumentReader(resource, config);
                 yield pdfReader.get();
             }
             case "md", "txt" -> {
-                // Markdown 和纯文本直接读取
                 TextReader textReader = new TextReader(resource);
                 yield textReader.get();
             }
@@ -309,6 +366,26 @@ public class RagServiceImpl implements RagService {
                 yield fallbackReader.get();
             }
         };
+    }
+
+    /**
+     * 尝试使用 ParagraphPdfDocumentReader 解析 PDF
+     *
+     * ParagraphPdfDocumentReader 利用 PDF 目录（TOC）信息按段落提取，
+     * 比 PagePdfDocumentReader（按页提取）产生更干净的文本。
+     * 但并非所有 PDF 都包含目录信息，所以需要降级处理。
+     */
+    private List<Document> tryParagraphPdfReader(Resource resource) {
+        try {
+            ParagraphPdfDocumentReader paragraphReader = new ParagraphPdfDocumentReader(resource);
+            List<Document> docs = paragraphReader.get();
+            if (docs != null && !docs.isEmpty()) {
+                return docs;
+            }
+        } catch (Exception e) {
+            log.debug("[PDF] ParagraphPdfDocumentReader 解析失败（PDF可能无目录信息）: {}", e.getMessage());
+        }
+        return null;
     }
 
     /**
@@ -336,9 +413,8 @@ public class RagServiceImpl implements RagService {
                 .topK(CommonConstant.RAG_DEFAULT_TOP_K)
                 .similarityThreshold(SIMILARITY_THRESHOLD);
 
-        // 如果指定了领域，添加过滤条件
         if (domain != null && !domain.isEmpty()) {
-            builder.filterExpression("domain == '" + domain + "'");
+            builder.filterExpression("domain == '" + domain.toLowerCase() + "'");
         }
 
         SearchRequest searchRequest = builder.build();

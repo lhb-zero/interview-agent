@@ -38,11 +38,11 @@ public class KnowledgeSearchTool {
         try {
             SearchRequest.Builder builder = SearchRequest.builder()
                     .query(query)
-                    .topK(topK > 0 ? topK : CommonConstant.RAG_DEFAULT_TOP_K);
+                    .topK(topK > 0 ? topK : CommonConstant.RAG_DEFAULT_TOP_K)
+                    .similarityThreshold(CommonConstant.RAG_SIMILARITY_THRESHOLD);
 
-            // 如果指定了领域，添加过滤条件
             if (domain != null && !domain.isEmpty()) {
-                builder.filterExpression("domain == '" + domain + "'");
+                builder.filterExpression("domain == '" + domain.toLowerCase() + "'");
             }
 
             List<Document> results = vectorStore.similaritySearch(builder.build());

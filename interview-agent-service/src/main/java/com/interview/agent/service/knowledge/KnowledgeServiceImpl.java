@@ -3,6 +3,7 @@ package com.interview.agent.service.knowledge;
 import com.interview.agent.dao.mapper.KnowledgeDocumentMapper;
 import com.interview.agent.model.entity.KnowledgeDocument;
 import com.interview.agent.model.vo.KnowledgeDocumentVO;
+import com.interview.agent.service.rag.RagService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class KnowledgeServiceImpl implements KnowledgeService {
 
     private final KnowledgeDocumentMapper documentMapper;
+    private final RagService ragService;
 
     @Override
     public List<KnowledgeDocumentVO> listDocuments(String domain) {
@@ -43,11 +45,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     public void deleteDocument(Long id) {
-        KnowledgeDocument doc = documentMapper.selectById(id);
-        if (doc != null) {
-            doc.setStatus("DELETED");
-            documentMapper.updateById(doc);
-        }
+        ragService.deleteDocument(id);
     }
 
     private KnowledgeDocumentVO toVO(KnowledgeDocument doc) {
