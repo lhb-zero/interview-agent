@@ -28,6 +28,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -207,7 +208,14 @@ public class ChatServiceImpl implements ChatService {
      * 构建Prompt（使用外部化模板）
      */
     private Prompt buildPrompt(ChatRequestDTO request) {
-        PromptTemplate template = new PromptTemplate(systemPromptResource);
+        String templateContent;
+        try {
+            templateContent = systemPromptResource.getContentAsString(StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.error("[Prompt] 读取系统模板文件失败", e);
+            throw new BusinessException(ResultCode.CHAT_ERROR);
+        }
+        PromptTemplate template = new PromptTemplate(templateContent);
         String systemContent = template.render(Map.of(
                 "domain", request.getDomain() != null ? request.getDomain() : "Java",
                 "difficulty", request.getDifficulty() != null ? request.getDifficulty() : "中级"

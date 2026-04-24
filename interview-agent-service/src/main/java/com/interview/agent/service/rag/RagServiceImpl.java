@@ -34,6 +34,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -385,7 +386,14 @@ public class RagServiceImpl implements RagService {
                     .collect(Collectors.joining("\n\n---\n\n"));
         }
 
-        PromptTemplate template = new PromptTemplate(ragPromptResource);
+        String templateContent;
+        try {
+            templateContent = ragPromptResource.getContentAsString(StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.error("[RAG-Prompt] 读取RAG模板文件失败", e);
+            throw new BusinessException(ResultCode.CHAT_ERROR);
+        }
+        PromptTemplate template = new PromptTemplate(templateContent);
         String systemContent = template.render(Map.of(
                 "context", context,
                 "question", request.getMessage()
