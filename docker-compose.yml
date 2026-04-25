@@ -1,6 +1,7 @@
 # =====================================================
 # 面试智能助手 - Docker Compose 配置
 # PostgreSQL 16 + PGVector 扩展
+# HuggingFace TEI Reranker (bge-reranker-v2-m3)
 # =====================================================
 
 services:
@@ -22,6 +23,44 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # =====================================================
+  # HuggingFace TEI — Reranker 服务
+  #
+  # 面试知识点：为什么用 TEI 而不是 Ollama 跑 Reranker？
+  # 1. Ollama 不支持 /v1/rerank 端点（截至 2026-04 仍未实现）
+  #    虽然 ollama pull bona/bge-reranker-v2-m3 可以下载模型，
+  #    但只能通过 chat API 做"提示词打分"，本质是 LLM Rerank，不是 Cross-Encoder
+  # 2. TEI 是 HuggingFace 官方推理服务器，原生支持 /rerank 端点
+  #    Cross-Encoder 架构：query + document → BERT → 相关性分数
+  #    比 LLM Rerank（生成式模型打分）更准确、更快速
+  # 3. TEI 用 Rust 实现，CPU 模式下 bge-reranker-v2-m3 对 20 个文档
+  #    精排耗时约 100-300ms，远优于 LLM Rerank 的数秒延迟
+  #
+  # 模型选择：BAAI/bge-reranker-v2-m3
+  # - 568M 参数，XLM-RoBERTa 架构
+  # - 中文优化好，多语言支持
+  # - VRAM: ~2.5GB (GPU) / 0 (CPU 模式用系统 RAM)
+  # - RTX 2060 6GB 建议 CPU 模式，留 VRAM 给 Ollama
+  # =====================================================
+  tei-reranker:
+    image: ghcr.1ms.run/huggingface/text-embeddings-inference:cpu-1.9
+    container_name: interview-agent-reranker
+    ports:
+      - "8081:80"
+    volumes:
+      - D:/models/bge-reranker-v2-m3:/data/BAAI/bge-reranker-v2-m3
+    environment:
+      - MODEL_ID=/data/BAAI/bge-reranker-v2-m3
+      - MAX_BATCH_TOKENS=16384
+      - MAX_CLIENT_BATCH_SIZE=32
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
 
 volumes:
   pgdata:

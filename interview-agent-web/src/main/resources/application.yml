@@ -48,6 +48,28 @@ app:
   upload:
     dir: ${user.dir}/uploads
 
+  # ==================== Reranker 配置 ====================
+  # HuggingFace TEI (Text Embeddings Inference) Reranker 服务
+  # 面试知识点：Reranker 是 RAG 两阶段检索架构的"精排"阶段
+  # - 第一阶段（召回）：向量检索 Top-K（快但粗，用 Embedding 近似匹配）
+  # - 第二阶段（精排）：Cross-Encoder 对 Top-K 逐一打分重排序（慢但准）
+  reranker:
+    enabled: true
+    # TEI Reranker 服务地址（对应 docker-compose 中 tei-reranker 容器）
+    url: http://localhost:8081
+    # 向量检索阶段召回的候选文档数（送入 Reranker 的输入量）
+    # 候选集太小可能漏掉相关文档，太大则 Rerank 延迟线性增加
+    # 业界推荐：Top-20 ~ Top-50
+    candidate-count: 20
+    # Rerank 后保留的最终文档数（送入 LLM 的上下文量）
+    # 业界推荐：Top-5 ~ Top-10
+    top-k: 5
+    # Rerank 分数阈值（0~1），低于此值的文档即使排序靠前也丢弃
+    # Cross-Encoder 输出的分数范围取决于模型，bge-reranker-v2-m3 通常 0~1
+    score-threshold: 0.0
+    # 单次 Rerank 请求超时（毫秒）
+    timeout-ms: 5000
+
 # ==================== MyBatis-Plus 配置 ====================
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml

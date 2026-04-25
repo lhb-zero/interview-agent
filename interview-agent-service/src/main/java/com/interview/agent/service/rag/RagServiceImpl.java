@@ -12,6 +12,8 @@ import com.interview.agent.model.entity.ChatSession;
 import com.interview.agent.model.entity.KnowledgeDocument;
 import com.interview.agent.model.vo.ChatMessageVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.interview.agent.service.rag.reranker.RerankingDocumentPostProcessor;
+import com.interview.agent.service.rag.reranker.RerankerProperties;
 import com.interview.agent.service.rag.transformer.DocumentTextCleaner;
 import com.interview.agent.service.rag.transformer.SmartTextSplitter;
 import lombok.RequiredArgsConstructor;
@@ -50,8 +52,9 @@ import java.util.stream.Collectors;
  * 2. 多格式支持：PDF (ParagraphPdf/PagePdf)、Markdown (TextReader)、TXT (TextReader)
  * 3. 文本清洗优化：DocumentTextCleaner 去页眉页脚、空行、噪声、PDF 断行修复
  * 4. 智能分块优化：SmartTextSplitter 段落优先 + 重叠窗口 + 中文感知
- * 5. RAG 检索增强：问题向量化 → 相似度检索 → Prompt 拼接 → LLM 生成
+ * 5. RAG 检索增强：问题向量化 → 相似度检索 → Reranking 精排 → Prompt 拼接 → LLM 生成
  * 6. 相似度阈值过滤：低于阈值的文档片段不参与增强，避免噪声
+ * 7. Reranking 精排：向量检索 Top-20 → Cross-Encoder 精排 Top-5 → 送入 LLM
  */
 @Slf4j
 @Service
@@ -62,6 +65,8 @@ public class RagServiceImpl implements RagService {
     private final VectorStore vectorStore;
     private final SmartTextSplitter smartTextSplitter;
     private final DocumentTextCleaner documentTextCleaner;
+    private final RerankingDocumentPostProcessor rerankingPostProcessor;
+    private final RerankerProperties rerankerProperties;
     private final KnowledgeDocumentMapper documentMapper;
     private final ChatSessionMapper sessionMapper;
     private final ChatMessageMapper messageMapper;
@@ -400,17 +405,28 @@ public class RagServiceImpl implements RagService {
     }
 
     /**
-     * 向量相似度检索（支持领域过滤 + 相似度阈值）
+     * 向量相似度检索 + Reranking 精排（两阶段检索架构）
      *
-     * 面试亮点：
-     * 1. filterExpression — 基于元数据的领域过滤，缩小检索范围
-     * 2. similarityThreshold — 相似度阈值过滤，避免引入不相关的噪声文档
-     * 3. topK — 返回最相似的 K 个结果
+     * 面试亮点：两阶段检索是 RAG 生产系统的标配
+     * - 第一阶段（召回）：向量检索 Top-20（快但粗，Embedding 近似匹配）
+     * - 第二阶段（精排）：Cross-Encoder 对 Top-20 逐一打分 → 取 Top-5（慢但准）
+     *
+     * 为什么不直接用向量检索 Top-5？
+     * - Embedding 是双塔模型，query 和 document 编码时没有交互
+     * - 语义相近但实际不相关的文档可能排在前面（如"线程安全"vs"线程池"）
+     * - Cross-Encoder 在 Transformer 每一层都有 query-doc 注意力交互，精度远高于余弦相似度
+     *
+     * 降级策略：Reranker 不可用时自动降级为纯向量检索结果
      */
     private List<Document> searchSimilarDocs(String query, String domain) {
+        // 向量检索阶段：扩大召回量（为 Reranker 提供足够候选集）
+        int candidateCount = rerankerProperties.isEnabled()
+                ? rerankerProperties.getCandidateCount()
+                : CommonConstant.RAG_DEFAULT_TOP_K;
+
         SearchRequest.Builder builder = SearchRequest.builder()
                 .query(query)
-                .topK(CommonConstant.RAG_DEFAULT_TOP_K)
+                .topK(candidateCount)
                 .similarityThreshold(SIMILARITY_THRESHOLD);
 
         if (domain != null && !domain.isEmpty()) {
@@ -418,7 +434,8 @@ public class RagServiceImpl implements RagService {
         }
 
         SearchRequest searchRequest = builder.build();
-        log.info("[RAG-Search] 向量检索: query='{}', domain='{}', topK={}, threshold={}", query, domain, searchRequest.getTopK(), SIMILARITY_THRESHOLD);
+        log.info("[RAG-Search] 向量检索: query='{}', domain='{}', topK={}, threshold={}, rerankerEnabled={}",
+                query, domain, candidateCount, SIMILARITY_THRESHOLD, rerankerProperties.isEnabled());
 
         List<Document> results = vectorStore.similaritySearch(searchRequest);
         log.info("[RAG-Search] 检索完成: 命中 {} 条文档", results.size());
@@ -433,6 +450,13 @@ public class RagServiceImpl implements RagService {
             log.info("[RAG-Search] 结果[{}]: domain={}, title={}, distance={}, length={}, preview='{}'",
                     i, docDomain, docTitle, distance, text != null ? text.length() : 0, preview);
             log.debug("[RAG-Search] 结果[{}] 完整内容:\n{}", i, text);
+        }
+
+        // Reranking 精排阶段
+        if (rerankerProperties.isEnabled() && !results.isEmpty()) {
+            List<Document> reranked = rerankingPostProcessor.rerank(query, results);
+            log.info("[RAG-Search] Reranking 精排完成: 原始={}条 → 精排={}条", results.size(), reranked.size());
+            return reranked;
         }
 
         return results;
