@@ -1,444 +1,70 @@
-23:15:45.994  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 向量检索: 
-query='请用自己的话解释一下什么是多态', domain='java', topK=5, threshold=0.5
-23:15:50.642  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 检索完成: 
-命中 2 条文档
-23:15:50.643  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[0]: domain=java, title=Java基础面试题-小林coding, distance=0.3635541, length=4056, preview='2026/3/3  00:25                                            Java基础面试题     |  小
-林coding |  Java面试学习    '
-23:15:50.643 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[0] 完
-整内容:
-2026/3/3  00:25                                            Java基础面试题     |  小林
-coding |  Java面试学习
-
-
-          多态解决了什么问题？
-
-
-
-          多态是指子类可以替换父类，在实际的代码运行过程中，调用子类的方法实现。多态 
-这种特性也
-
-
-          需要编程语言提供特殊的语法机制来实现，比如继承、接口类。
-
-
-
-          多态可以提高代码的扩展性和复用性，是很多设计模式、设计原则、编程技巧的代码 
-实现基础。
-
-
-          比如策略模式、基于接口而非实现编程、依赖倒置原则、里式替换原则、利用多态去 
-掉冗长的
-     if-
-          else  语句等等
-
-
-
-          面向对象的设计原则你知道有哪些吗
-
-
-
-          面向对象编程中的六大原则：
-
-
-
-             单一职责原则（SRP）                 ：一个类应该只有一个引起它变化的原因
-，即一个类应该只负责一项职
-
-
-             责。例子：考虑一个员工类，它应该只负责管理员工信息，而不应负责其他无关工
-作。
-
-
-             开放封闭原则（OCP）                  ：软件实体应该对扩展开放，对修改封 
-闭。例子：通过制定接口来实现这
-
-
-             一原则，比如定义一个图形类，然后让不同类型的图形继承这个类，而不需要修改
-图形类本
-
-
-             身。
-
-
-
-             里氏替换原则（LSP）                 ：子类对象应该能够替换掉所有父类对象
-。例子：一个正方形是一个矩
-
-
-             形，但如果修改一个矩形的高度和宽度时，正方形的行为应该如何改变就是一个违
-反里氏替换
-
-
-             原则的例子。
-
-
-
-             接口隔离原则（ISP）                ：客户端不应该依赖那些它不需要的接口 
-，即接口应该小而专。例子：通
-
-
-             过接口抽象层来实现底层和高层模块之间的解耦，比如使用依赖注入。
-
-
-
-             依赖倒置原则（DIP）                 ：高层模块不应该依赖低层模块，二者都
-应该依赖于抽象；抽象不应该依
-23:15:50.648  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[1]: domain=java, title=Java基础面试题-小林coding, distance=0.38178578, length=5301, preview='2026/3/3  00:25                                            Java基础面试题     |   
-小林coding |  Java面试学习    '
-23:15:50.649 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[1] 完
-整内容:
-2026/3/3  00:25                                            Java基础面试题     |  小林
-coding |  Java面试学习
-
-
-          的功能，具有灵活性和可扩展性，通过封装和继承可以更好地应对需求变化。       
-
-
-
-          Java面向对象的三大特性包括：封装、继承、多态：
-
-
-
-             封装：封装是指将对象的属性（数据）和行为（方法）结合在一起，对外隐藏对象
-的内部细
-
-
-             节，仅通过对象提供的接口与外界交互。封装的目的是增强安全性和简化编程，使
-得对象更加
-
-
-             独立。
-
-
-
-             继承：继承是一种可以使得子类自动共享父类数据结构和方法的机制。它是代码复
-用的重要手
-
-
-             段，通过继承可以建立类与类之间的层次关系，使得结构更加清晰。
-
-
-
-             多态：多态是指允许不同类的对象对同一消息作出响应。即同一个接口，使用不同
-的实例而执
-
-
-             行不同操作。多态性可以分为编译时多态（重载）和运行时多态（重写）        
-                                                       。它使得程序具有良好
-
-
-             的灵活性和扩展性。
-
-
-
-          多态体现在哪几个方面？
-
-
-
-          多态在面向对象编程中可以体现在以下几个方面：
-
-
-
-             方法重载：
-
-
-
-                 方法重载是指同一类中可以有多个同名方法，它们具有不同的参数列表（参数
-类型、数量或
-
-
-                 顺序不同）        。虽然方法名相同，但根据传入的参数不同，编译器会在
-编译时确定调用哪个方
-
-
-                 法。
-
-
-
-                 示例：对于一个                add    方法，可以定义为
-   add(int    a,  int   b)   和    add(double      a,  double
-
-
-                 b)  。
-
-
-
-             方法重写：
-
-
-
-                 方法重写是指子类能够提供对父类中同名方法的具体实现。在运行时，JVM会 
-根据对象的实
-
-
-                 际类型确定调用哪个版本的方法。这是实现多态的主要方式。
-
-
-
-                 示例：在一个动物类中，定义一个                                sound 
-    方法，子类            Dog    可以重写该方法以实现
-
-
-                  bark   ，而       Cat   可以实现           meow   。
-
-
-
-             接口与实现：
-
-
-
-                 多态也体现在接口的使用上，多个类可以实现同一个接口，并且用接口类型的
-引用来调用这
-23:15:50.780 DEBUG c.i.a.d.m.ChatMessageMapper.selectList   : ==>  Preparing: SELECT 
-id,session_id,role,content,tokens_used,created_at FROM chat_message WHERE (session_id = ?) ORDER BY created_at ASC LIMIT 20
-23:15:50.781 DEBUG c.i.a.d.m.ChatMessageMapper.selectList   : ==> Parameters: 7391088c64eb4dde98cb138bfe3d366f(String)
-23:15:50.793 DEBUG c.i.a.d.m.ChatMessageMapper.selectList   : <==      Total: 0      
-23:15:50.801  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Prompt] 构建完成: 
-model=qwen3:1.7b, similarDocs=2, contextLength=9442, historyCount=0, totalMessages=2, userMessage='请用自己的话解释一下什么是多态'
-23:15:50.802 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Prompt] RAG上下文 
-内容:
-【来源: java / Java基础面试题-小林coding - 第28段】
-2026/3/3  00:25                                            Java基础面试题     |  小林
-coding |  Java面试学习
-
-
-          多态解决了什么问题？
-
-
-
-          多态是指子类可以替换父类，在实际的代码运行过程中，调用子类的方法实现。多态 
-这种特性也
-
-
-          需要编程语言提供特殊的语法机制来实现，比如继承、接口类。
-
-
-
-          多态可以提高代码的扩展性和复用性，是很多设计模式、设计原则、编程技巧的代码 
-实现基础。
-
-
-          比如策略模式、基于接口而非实现编程、依赖倒置原则、里式替换原则、利用多态去 
-掉冗长的
-     if-
-          else  语句等等
-
-
-
-          面向对象的设计原则你知道有哪些吗
-
-
-
-          面向对象编程中的六大原则：
-
-
-
-             单一职责原则（SRP）                 ：一个类应该只有一个引起它变化的原因
-，即一个类应该只负责一项职
-
-
-             责。例子：考虑一个员工类，它应该只负责管理员工信息，而不应负责其他无关工
-作。
-
-
-             开放封闭原则（OCP）                  ：软件实体应该对扩展开放，对修改封 
-闭。例子：通过制定接口来实现这
-
-
-             一原则，比如定义一个图形类，然后让不同类型的图形继承这个类，而不需要修改
-图形类本
-
-
-             身。
-
-
-
-             里氏替换原则（LSP）                 ：子类对象应该能够替换掉所有父类对象
-。例子：一个正方形是一个矩
-
-
-             形，但如果修改一个矩形的高度和宽度时，正方形的行为应该如何改变就是一个违
-反里氏替换
-
-
-             原则的例子。
-
-
-
-             接口隔离原则（ISP）                ：客户端不应该依赖那些它不需要的接口 
-，即接口应该小而专。例子：通
-
-
-             过接口抽象层来实现底层和高层模块之间的解耦，比如使用依赖注入。
-
-
-
-             依赖倒置原则（DIP）                 ：高层模块不应该依赖低层模块，二者都
-应该依赖于抽象；抽象不应该依
-
----
-
-【来源: java / Java基础面试题-小林coding - 第26段】
-2026/3/3  00:25                                            Java基础面试题     |  小林
-coding |  Java面试学习
-
-
-          的功能，具有灵活性和可扩展性，通过封装和继承可以更好地应对需求变化。       
-
-
-
-          Java面向对象的三大特性包括：封装、继承、多态：
-
-
-
-             封装：封装是指将对象的属性（数据）和行为（方法）结合在一起，对外隐藏对象
-的内部细
-
-
-             节，仅通过对象提供的接口与外界交互。封装的目的是增强安全性和简化编程，使
-得对象更加
-
-
-             独立。
-
-
-
-             继承：继承是一种可以使得子类自动共享父类数据结构和方法的机制。它是代码复
-用的重要手
-
-
-             段，通过继承可以建立类与类之间的层次关系，使得结构更加清晰。
-
-
-
-             多态：多态是指允许不同类的对象对同一消息作出响应。即同一个接口，使用不同
-的实例而执
-
-
-             行不同操作。多态性可以分为编译时多态（重载）和运行时多态（重写）        
-                                                       。它使得程序具有良好
-
-
-             的灵活性和扩展性。
-
-
-
-          多态体现在哪几个方面？
-
-
-
-          多态在面向对象编程中可以体现在以下几个方面：
-
-
-
-             方法重载：
-
-
-
-                 方法重载是指同一类中可以有多个同名方法，它们具有不同的参数列表（参数
-类型、数量或
-
-
-                 顺序不同）        。虽然方法名相同，但根据传入的参数不同，编译器会在
-编译时确定调用哪个方
-
-
-                 法。
-
-
-
-                 示例：对于一个                add    方法，可以定义为
-   add(int    a,  int   b)   和    add(double      a,  double
-
-
-                 b)  。
-
-
-
-             方法重写：
-
-
-
-                 方法重写是指子类能够提供对父类中同名方法的具体实现。在运行时，JVM会 
-根据对象的实
-
-
-                 际类型确定调用哪个版本的方法。这是实现多态的主要方式。
-
-
-
-                 示例：在一个动物类中，定义一个                                sound 
-    方法，子类            Dog    可以重写该方法以实现
-
-
-                  bark   ，而       Cat   可以实现           meow   。
-
-
-
-             接口与实现：
-
-
-
-                 多态也体现在接口的使用上，多个类可以实现同一个接口，并且用接口类型的
-引用来调用这
-23:15:50.810 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Prompt] System Prompt内容:
-你是一位专业的面试智能助手。请根据以下检索到的参考资料来回答用户的问题。
-
-要求：
-1. 优先基于参考资料回答，不要编造参考资料中没有的内容
-2. 如果参考资料不足以完整回答，可以补充你的知识，但必须明确标注"【补充】"
-3. 引用参考资料时，使用上下文中【来源: 领域 / 文档标题 - 第N段】的格式标注出处，不要 
-编造来源
-4. 回答使用中文，结构清晰，使用 Markdown 格式
-5. 如果参考资料与问题无关，说明未找到相关资料，基于自身知识回答
-
-参考资料：
-<context>
-
-用户问题：<question>
-
-23:15:50.814 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==>  Preparing: INSERT 
-INTO chat_message ( session_id, role, content, created_at ) VALUES ( ?, ?, ?, ? )    
-23:15:50.814 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==> Parameters: 7391088c64eb4dde98cb138bfe3d366f(String), user(String), 请用自己的话解释一下什么是多态(String), 2026-04-24T23:15:50.813907(LocalDateTime)
-23:15:50.819 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : <==    Updates: 1
-23:15:55.954 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==>  Preparing: INSERT 
-INTO chat_message ( session_id, role, content, created_at ) VALUES ( ?, ?, ?, ? )    
-23:15:55.955 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==> Parameters: 7391088c64eb4dde98cb138bfe3d366f(String), assistant(String), 多态（Polymorphism）是面向对象 
-编程中的一个核心概念，指的是同一个接口或抽象类型可以具有多种不同的实现方式。简单来说 
-，多态允许不同的对象对同一操作具有不同的处理方式，从而实现灵活和扩展性的编程。       
-
-在编程中，多态通常分为两种形式：
-
-1. **编译时多态（Compile-time Polymorphism）**：也称为静态多态，通过方法重载（Overloading）实现。同一方法名在不同参数情况下有不同实现，例如在Java中，多个方法具有相同名称 
-但不同参数列表的情况。
-
-2. **运行时多态（Run-time Polymorphism）**：也称为动态多态，通过接口或抽象类实现。例 
-如在Java中，子类实现接口中的方法，调用时根据实际对象类型进行不同的处理。
-
-【补充】多态在实际应用中可以提高代码的灵活性和可维护性，使得代码更加通用和易于扩展。 
-例如，在面向对象编程中，多态常用于实现接口或抽象类，使得不同类可以实现相同的方法，从 
-而统一调用方式。(String), 2026-04-24T23:15:55.951498300(LocalDateTime)
-23:15:55.959 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : <==    Updates: 1      
-23:15:55.960  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Stream] LLM流式响 
-应完成: sessionId=7391088c64eb4dde98cb138bfe3d366f, 响应长度=431
-23:15:55.960 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Stream] LLM流式响 
-应内容:
-多态（Polymorphism）是面向对象编程中的一个核心概念，指的是同一个接口或抽象类型可以具 
-有多种不同的实现方式。简单来说，多态允许不同的对象对同一操作具有不同的处理方式，从而 
-实现灵活和扩展性的编程。
-
-在编程中，多态通常分为两种形式：
-
-1. **编译时多态（Compile-time Polymorphism）**：也称为静态多态，通过方法重载（Overloading）实现。同一方法名在不同参数情况下有不同实现，例如在Java中，多个方法具有相同名称 
-但不同参数列表的情况。
-
-2. **运行时多态（Run-time Polymorphism）**：也称为动态多态，通过接口或抽象类实现。例 
-如在Java中，子类实现接口中的方法，调用时根据实际对象类型进行不同的处理。
-
-【补充】多态在实际应用中可以提高代码的灵活性和可维护性，使得代码更加通用和易于扩展。 
-例如，在面向对象编程中，多态常用于实现接口或抽象类，使得不同类可以实现相同的方法，从 
-而统一调用方式。
-23:15:55.999 DEBUG c.i.a.d.m.ChatSessionMapper.selectList   : ==>  Preparing: SELECT 
-id,session_id,title,domain,model_name,created_at FROM chat_session ORDER BY created_at DESC
-23:15:55.999 DEBUG c.i.a.d.m.ChatSessionMapper.selectList   : ==> Parameters: 
-23:15:56.006 DEBUG c.i.a.d.m.ChatSessionMapper.selectList   : <==      Total: 15     
+01:35:15.896  INFO c.i.agent.service.rag.RagServiceImpl     : 开始导入文档: filePath=D:\桌面\java\interview agent\uploads\24f7c4295b3942288ca99628f975e180.pdf, domain=java, title=Java并发编程面试题-小林coding, fileType=pdf   
+01:35:16.099 DEBUG c.i.agent.service.rag.RagServiceImpl     : [PDF] ParagraphPdfDocumentReader 解析失败（PDF可能无目录信息）: Document outline (e.g. TOC) is null. Make sure the PDF document has a table of contents (TOC). If not, consider the PagePdfDocumentReader or the TikaDocumentReader instead.  
+01:35:16.099  INFO c.i.agent.service.rag.RagServiceImpl     : [PDF] ParagraphPdfDocumentReader 无结果，降级为 PagePdfDocumentReader
+01:35:16.495  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 1
+01:35:17.206  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 9
+01:35:17.346  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 17
+01:35:17.494  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 25
+01:35:17.627  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 33
+01:35:17.727  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 41
+01:35:17.784  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 49
+01:35:17.918  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 57
+01:35:18.053  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 65
+01:35:18.110  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 73
+01:35:18.194  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 81
+01:35:18.224  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processed total 82 pages
+01:35:18.234  INFO c.i.agent.service.rag.RagServiceImpl     : 文档解析完成: 共 82 个原始文档段
+01:35:18.246 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.246 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.254 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.256 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.259 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.262 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.263 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.264 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.264 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.266 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.270 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.271 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.272 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.273 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.280 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.284 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.293 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.302 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.305 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.316 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.327 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.338 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.344 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.353 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.359 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.383 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.396 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.398 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.399 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.399 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.400 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.401 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.406 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.407 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.410 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.417 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.425 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.437 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.439 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.443 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.444 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.445 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.446 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.447 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.448 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.449 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.451 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.452 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.452 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.452 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.453 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.453 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.454 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.454 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.454 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.454 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.455 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.455 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.456 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.458 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.460 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.461 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.461 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.462 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.463 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.463 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.463 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.465 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.465 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.467 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.469 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.469 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.470 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.470 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.470 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.470 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.470 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.471 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.471 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.471 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.471 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.471 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.473 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: ')'01:35:18.474 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.475 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.475 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.475 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.475 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.475 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.475 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '};'
+01:35:18.476 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.477 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.479 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.480 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.481 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.481 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.483 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.484 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.489 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.489 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.489 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.490 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.491 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.491 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.491 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.492 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.492 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.492 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.492 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.492 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.493 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.493 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.496 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.497 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.499 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.499 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.499 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.499 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.500 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.502 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.503 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.504 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.505 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '};'
+01:35:18.506 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.507 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.507 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.507 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.508 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.509 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.510 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.511 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.511 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.517 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.518 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.518 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.519 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.521 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.522 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.522 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.522 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.523 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.524 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.524 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.525 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.526 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.526 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.526 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.529 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.529 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.529 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.529 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.530 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.530 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.531 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.532 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.533 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.533 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.534 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.534 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.534 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.534 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.535 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.535 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.535 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.536 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.536 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.536 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.537 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: ');'
+01:35:18.538 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.539 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '|'01:35:18.540 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: 'v'01:35:18.540 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '|'01:35:18.540 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '否
+'
+01:35:18.541 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '|'01:35:18.541 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: 'v'01:35:18.541 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '|'01:35:18.542 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '否
+'
+01:35:18.542 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '|'01:35:18.542 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: 'v'01:35:18.542 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: ');'
+01:35:18.543 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: ');'
+01:35:18.543 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '下
+：'
+01:35:18.543 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: ');'
+01:35:18.546 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.546 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.546 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.548 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.548 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.549 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.550 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.550 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '场
+景'
+01:35:18.550 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.550 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.550 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.551 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.551 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '};'
+01:35:18.552 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.552 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.552 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.552 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.552 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '};'
+01:35:18.552 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.553 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.553 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.553 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.553 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.554 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.554 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.554 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '骤
+：'
+01:35:18.557 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.557 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.558 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.558 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.558 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.559 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.560 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.560 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.560 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.560 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.560 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.561 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.561 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.561 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.561 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : 移除短行: '}'01:35:18.563  INFO c.i.a.s.r.t.DocumentTextCleaner          : [TextCleaner] 清洗完成: 输入 82 个文档, 输出 82 个, 原文总长=480725, 清洗后总长=67609,  
+压缩率=85.9%
+01:35:18.563  INFO c.i.agent.service.rag.RagServiceImpl     : 文本清洗完成: 保留 82 个有效文档段（清洗前 82）
+01:35:18.573  INFO c.i.a.s.r.transformer.SmartTextSplitter  : [SmartSplitter] 分块完成: 输入 82 个文档, 输出 129 个分块, chunkSize=800, overlap=100   
+01:35:18.575  INFO c.i.agent.service.rag.RagServiceImpl     : 文本分块完成: 共 129 个分块
+01:35:18.577  INFO c.i.agent.service.rag.RagServiceImpl     : 过滤短文本块
+完成: 保留 129/129 个有效分块
+01:35:18.583 DEBUG c.i.a.d.m.K.insert                       : ==>  Preparing: INSERT INTO knowledge_document ( title, domain, file_type, file_path, chunk_count, status, created_at, updated_at ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )
+01:35:18.584 DEBUG c.i.a.d.m.K.insert                       : ==> Parameters: Java并发编程面试题-小林coding(String), java(String), pdf(String), D:\桌 
+面\java\interview agent\uploads\24f7c4295b3942288ca99628f975e180.pdf(String), 0(Integer), ACTIVE(String), 2026-04-25T01:35:18.577185500(LocalDateTime), 2026-04-25T01:35:18.577185500(LocalDateTime)
+01:35:18.588 DEBUG c.i.a.d.m.K.insert                       : <==    Updates: 1
+01:35:18.591  INFO c.i.agent.service.rag.RagServiceImpl     : 文档记录已创 
+建: docId=6, title=Java并发编程面试题-小林coding
+01:35:26.313  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 10/129
+01:35:28.407  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 20/129
+01:35:30.489  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 30/129
+01:35:32.759  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 40/129
+01:35:34.670  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 50/129
+01:35:36.658  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 60/129
+01:35:38.758  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 70/129 70/129                                                                     80/129
+01:35:40.873  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 90/129 80/129                                                                     100/129
+01:35:42.995  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 110/129 90/129                                                                     120/129
+01:35:44.982  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 129/129 100/129                                                                    成功 129/129 个分块已写入 PGV
+01:35:47.148  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 110/129                                                                   g: UPDATE knowledge_document S
+01:35:49.240  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度:, updated_at=? WHERE id=? AND  120/129                                                                   : ==> Parameters: Java并发编程
+01:35:51.139  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度:w agent\uploads\24f7c4295b3942 129/129                                                                   (LocalDateTime), 2026-04-25T01
+01:35:51.140  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储完成: 成功 129/129 个分块已写入 PGVector                                        s: 1
+01:35:51.141 DEBUG c.i.a.d.m.K.updateById                   : ==>  Preparin docId=6, title=Java并发编程面g: UPDATE knowledge_document SET title=?, domain=?, file_type=?, file_path=?, chunk_count=?, created_at=?, updated_at=? WHERE id=? AND status='ACTIVE'g: SELECT id,title,domain,file01:35:51.142 DEBUG c.i.a.d.m.K.updateById                   : ==> Parameterument WHERE status='ACTIVE' ANs: Java并发编程面试题-小林coding(String), java(String), pdf(String), D:\桌 
+面\java\interview agent\uploads\24f7c4295b3942288ca99628f975e180.pdf(Strings: ACTIVE(String)), 129(Integer), 2026-04-25T01:35:18.577185500(LocalDateTime), 2026-04-25T0l: 11:35:51.140137100(LocalDateTime), 6(Long)
+01:35:51.154 DEBUG c.i.a.d.m.K.updateById                   : <==    Updates: 1
+01:35:51.155  INFO c.i.agent.service.rag.RagServiceImpl     : 文档导入成功: docId=6, title=Java并发编程面试题-小林coding, domain=java, fileType=pdf,  
+成功chunks=129, 失败chunks=0
+01:35:51.169 DEBUG c.i.a.d.m.K.selectList                   : ==>  Preparing: SELECT id,title,domain,file_type,file_path,chunk_count,status,created_at,updated_at FROM knowledge_document WHERE status='ACTIVE' AND (status = ?) 
+ORDER BY created_at DESC
+01:35:51.170 DEBUG c.i.a.d.m.K.selectList                   : ==> Parameters: ACTIVE(String)
+01:35:51.175 DEBUG c.i.a.d.m.K.selectList                   : <==      Total: 1

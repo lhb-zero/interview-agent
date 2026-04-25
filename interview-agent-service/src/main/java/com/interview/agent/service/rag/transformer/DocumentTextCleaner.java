@@ -63,6 +63,14 @@ public class DocumentTextCleaner implements DocumentTransformer {
             "[。！？；…」）》】]"
     );
 
+    private static final Pattern CODE_PUNCTUATION_LINE = Pattern.compile(
+            "^[}\\]);]+[;,.]?$"
+    );
+
+    private static final Pattern CONTAINS_CHINESE = Pattern.compile(
+            "[\\u4e00-\\u9fff]"
+    );
+
     private final int minLineLength;
 
     public DocumentTextCleaner() {
@@ -119,6 +127,8 @@ public class DocumentTextCleaner implements DocumentTransformer {
 
         String[] lines = result.split("\\n");
         List<String> keptLines = new ArrayList<>();
+        int removedShortLines = 0;
+        int removedHeaderLines = 0;
 
         for (String line : lines) {
             String trimmed = line.trim();
@@ -129,27 +139,32 @@ public class DocumentTextCleaner implements DocumentTransformer {
             }
 
             if (PAGE_HEADER_DATE.matcher(trimmed).matches()) {
-                log.debug("移除页眉(日期): '{}'", trimmed);
+                removedHeaderLines++;
                 continue;
             }
 
             if (PAGE_NUMBER.matcher(trimmed).matches()) {
-                log.debug("移除页码: '{}'", trimmed);
+                removedHeaderLines++;
                 continue;
             }
 
             if (REPEATED_HEADER.matcher(trimmed).matches()) {
-                log.debug("移除重复标题行: '{}'", trimmed);
+                removedHeaderLines++;
                 continue;
             }
 
-            if (trimmed.length() < minLineLength && !CHINESE_SENTENCE_END.matcher(trimmed).find()) {
-                log.debug("移除短行: '{}'", trimmed);
+            if (isShortNoiseLine(trimmed)) {
+                removedShortLines++;
                 continue;
             }
 
             String normalized = MULTIPLE_SPACES.matcher(trimmed).replaceAll(" ");
             keptLines.add(normalized);
+        }
+
+        if (removedShortLines > 0 || removedHeaderLines > 0) {
+            log.debug("[TextCleaner] 单文档清洗: 移除短噪声行={}, 移除页眉页脚行={}",
+                    removedShortLines, removedHeaderLines);
         }
 
         result = String.join("\n", keptLines);
@@ -256,5 +271,25 @@ public class DocumentTextCleaner implements DocumentTransformer {
     private boolean isSentenceStart(char c) {
         return c == '「' || c == '《' || c == '（' || c == '('
                 || c == '【' || c == '[' || c == '—' || c == '"';
+    }
+
+    private boolean isShortNoiseLine(String trimmed) {
+        if (trimmed.length() >= minLineLength) {
+            return false;
+        }
+
+        if (CODE_PUNCTUATION_LINE.matcher(trimmed).matches()) {
+            return false;
+        }
+
+        if (CONTAINS_CHINESE.matcher(trimmed).find()) {
+            return false;
+        }
+
+        if (CHINESE_SENTENCE_END.matcher(trimmed).find()) {
+            return false;
+        }
+
+        return true;
     }
 }
