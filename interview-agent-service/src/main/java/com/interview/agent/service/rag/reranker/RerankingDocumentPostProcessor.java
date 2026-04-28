@@ -1,6 +1,7 @@
 package com.interview.agent.service.rag.reranker;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
@@ -110,15 +111,31 @@ public class RerankingDocumentPostProcessor {
             log.info("[Rerank] 调用 TEI Reranker: url={}, query='{}', candidateCount={}",
                     rerankUrl, query.length() > 50 ? query.substring(0, 50) + "..." : query, texts.size());
 
-            TeiRerankerApi.Response response = restTemplate.postForObject(
-                    rerankUrl, entity, TeiRerankerApi.Response.class);
+            String responseBody = restTemplate.postForObject(
+                    rerankUrl, entity, String.class);
 
-            if (response == null || response.getResults() == null || response.getResults().isEmpty()) {
+            if (responseBody == null || responseBody.isBlank()) {
                 log.warn("[Rerank] TEI 返回空结果，降级使用原始检索结果");
                 return documents;
             }
 
-            List<Document> rerankedDocs = processRerankResults(documents, response);
+            List<TeiRerankerApi.RerankResult> results;
+            String trimmed = responseBody.trim();
+            if (trimmed.startsWith("[")) {
+                results = objectMapper.readValue(trimmed,
+                        new TypeReference<List<TeiRerankerApi.RerankResult>>() {});
+            } else {
+                TeiRerankerApi.Response response = objectMapper.readValue(trimmed,
+                        TeiRerankerApi.Response.class);
+                results = response != null ? response.getResults() : null;
+            }
+
+            if (results == null || results.isEmpty()) {
+                log.warn("[Rerank] TEI 返回空结果，降级使用原始检索结果");
+                return documents;
+            }
+
+            List<Document> rerankedDocs = processRerankResults(documents, results);
 
             long elapsed = System.currentTimeMillis() - startTime;
             log.info("[Rerank] 精排完成: 输入={}个文档, 输出={}个文档, 耗时={}ms",
@@ -138,8 +155,7 @@ public class RerankingDocumentPostProcessor {
     /**
      * 处理 Rerank 返回结果：按分数降序排列，应用阈值过滤，取 Top-K
      */
-    private List<Document> processRerankResults(List<Document> originalDocs, TeiRerankerApi.Response response) {
-        List<TeiRerankerApi.RerankResult> results = response.getResults();
+    private List<Document> processRerankResults(List<Document> originalDocs, List<TeiRerankerApi.RerankResult> results) {
 
         results.sort(Comparator.comparingDouble(TeiRerankerApi.RerankResult::getScore).reversed());
 

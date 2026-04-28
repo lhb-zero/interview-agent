@@ -1,7 +1,7 @@
 # =====================================================
 # 面试智能助手 - Docker Compose 配置
 # PostgreSQL 16 + PGVector 扩展
-# HuggingFace TEI Reranker (bge-reranker-v2-m3)
+# HuggingFace TEI Reranker (bce-reranker-base_v1)
 # =====================================================
 
 services:
@@ -37,11 +37,11 @@ services:
   # 3. TEI 用 Rust 实现，CPU 模式下 bge-reranker-v2-m3 对 20 个文档
   #    精排耗时约 100-300ms，远优于 LLM Rerank 的数秒延迟
   #
-  # 模型选择：BAAI/bge-reranker-v2-m3
-  # - 568M 参数，XLM-RoBERTa 架构
-  # - 中文优化好，多语言支持
-  # - VRAM: ~2.5GB (GPU) / 0 (CPU 模式用系统 RAM)
-  # - RTX 2060 6GB 建议 CPU 模式，留 VRAM 给 Ollama
+  # 模型选择：maidalun/bce-reranker-base_v1
+  # - 279M 参数，BERT 架构
+  # - 中文优化好，Netease Youdao 出品
+  # - 内存占用：~1GB (CPU 模式)，Docker 7.6GB 可运行
+  # - 替代方案：BAAI/bge-reranker-v2-m3（568M 参数，更准但需 4-5GB 内存）
   # =====================================================
   tei-reranker:
     image: ghcr.1ms.run/huggingface/text-embeddings-inference:cpu-1.9
@@ -49,9 +49,9 @@ services:
     ports:
       - "8081:80"
     volumes:
-      - D:/models/bge-reranker-v2-m3:/data/BAAI/bge-reranker-v2-m3
+      - D:/models/bce-reranker-base_v1:/data/maidalun/bce-reranker-base_v1
     environment:
-      - MODEL_ID=/data/BAAI/bge-reranker-v2-m3
+      - MODEL_ID=/data/maidalun/bce-reranker-base_v1
       - MAX_BATCH_TOKENS=16384
       - MAX_CLIENT_BATCH_SIZE=32
     restart: unless-stopped

@@ -68,7 +68,7 @@ app:
     # Cross-Encoder 输出的分数范围取决于模型，bge-reranker-v2-m3 通常 0~1
     score-threshold: 0.0
     # 单次 Rerank 请求超时（毫秒）
-    timeout-ms: 5000
+    timeout-ms: 30000
 
 # ==================== MyBatis-Plus 配置 ====================
 mybatis-plus:

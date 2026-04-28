@@ -18,13 +18,14 @@ import java.util.List;
  *     "raw_scores": false    // true 返回原始 logit 分数，false 返回归一化 0~1 分数
  *   }
  *
- * 响应格式：
- *   {
- *     "results": [
- *       { "index": 0, "score": 0.92, "text": "线程池的核心参数..." },
- *       { "index": 2, "score": 0.45, "text": "JVM垃圾回收机制..." }
- *     ]
- *   }
+ * 响应格式（TEI 版本差异）：
+ *   TEI CPU 版本（Candle 后端）返回 JSON 数组：
+ *     [{"index": 0, "score": 0.92}, {"index": 2, "score": 0.45}]
+ *
+ *   TEI GPU 版本（ORT 后端）返回 JSON 对象：
+ *     {"results": [{"index": 0, "score": 0.92, "text": "..."}]}
+ *
+ *   本实现兼容两种格式
  *
  * Cross-Encoder 原理（面试高频）：
  * - 双塔模型（Embedding 检索）：query 和 document 分别编码为向量，计算余弦相似度
