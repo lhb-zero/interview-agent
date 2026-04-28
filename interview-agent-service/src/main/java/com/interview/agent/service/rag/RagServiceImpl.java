@@ -454,9 +454,15 @@ public class RagServiceImpl implements RagService {
 
         // Reranking 精排阶段
         if (rerankerProperties.isEnabled() && !results.isEmpty()) {
-            List<Document> reranked = rerankingPostProcessor.rerank(query, results);
-            log.info("[RAG-Search] Reranking 精排完成: 原始={}条 → 精排={}条", results.size(), reranked.size());
-            return reranked;
+            List<Document> rerankedDocs = rerankingPostProcessor.rerank(query, results);
+            boolean hasReranked = rerankedDocs.stream()
+                    .anyMatch(doc -> doc.getMetadata().containsKey("rerank_score"));
+            if (hasReranked) {
+                log.info("[RAG-Search] Reranking 精排完成: 原始={}条 → 精排={}条", results.size(), rerankedDocs.size());
+            } else {
+                log.warn("[RAG-Search] Reranking 失败，降级使用原始向量检索结果: {}条", results.size());
+            }
+            return rerankedDocs;
         }
 
         return results;

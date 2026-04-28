@@ -65,7 +65,13 @@ public class KnowledgeSearchTool {
             // Reranking 精排阶段
             if (rerankerProperties.isEnabled()) {
                 results = rerankingPostProcessor.rerank(query, results);
-                log.info("Tool Calling - KnowledgeSearchTool Rerank: 候选={} → 精排={}", candidateCount, results.size());
+                boolean hasReranked = results.stream()
+                        .anyMatch(doc -> doc.getMetadata().containsKey("rerank_score"));
+                if (hasReranked) {
+                    log.info("Tool Calling - KnowledgeSearchTool Rerank: 候选={} → 精排={}", candidateCount, results.size());
+                } else {
+                    log.warn("Tool Calling - KnowledgeSearchTool Rerank 失败，降级使用原始检索结果: {}条", results.size());
+                }
             }
 
             return results.stream()
