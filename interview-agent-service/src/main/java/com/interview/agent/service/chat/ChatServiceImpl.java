@@ -132,7 +132,7 @@ public class ChatServiceImpl implements ChatService {
                     // 5. 流式完成后保存完整助手消息
                     saveMessage(sessionId, CommonConstant.ROLE_ASSISTANT, fullResponse.toString());
                     log.info("[ChatStream] LLM流式响应完成: sessionId={}, 响应长度={}", sessionId, fullResponse.length());
-                    log.debug("[ChatStream] LLM流式响应内容:\n{}", fullResponse.toString());
+                    // log.debug("[ChatStream] LLM流式响应内容:\n{}", fullResponse.toString());
                 })
                 .onErrorResume(e -> {
                     log.error("[ChatStream] LLM流式调用失败: sessionId={}, ragEnabled={}", sessionId, request.getRagEnabled(), e);

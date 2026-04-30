@@ -17,12 +17,16 @@ CREATE TABLE IF NOT EXISTS vector_store (
     id        VARCHAR(255) PRIMARY KEY,
     content   TEXT,
     metadata  JSONB,
-    embedding vector(1024)
+    embedding vector(1024),
+    text_hash VARCHAR(64)
 );
 
 CREATE INDEX IF NOT EXISTS idx_vector_store_embedding_hnsw
     ON vector_store
     USING hnsw (embedding vector_cosine_ops);
+
+CREATE INDEX IF NOT EXISTS idx_vector_store_text_hash
+    ON vector_store(text_hash);
 
 -- =====================================================
 -- 1. 知识库文档表

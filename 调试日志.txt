@@ -1,57 +1,996 @@
-13:28:58.912  INFO c.i.agent.service.rag.RagServiceImpl     : 开始导入文档: filePath=D:\桌面\java\interview agent\uploads\da42bdd5f1c54bc0876c90b21098f5f4.pdf, domain=java, title=Java并发编程面试题 _ 小林coding, fileType=pdf
-13:28:59.203 DEBUG c.i.agent.service.rag.RagServiceImpl     : [PDF] ParagraphPdfDocumentReader 解析失败（
-PDF可能无目录信息）: Document outline (e.g. TOC) is null. Make sure the PDF document has a table of contents (TOC). If not, consider the PagePdfDocumentReader or the TikaDocumentReader instead.
-13:28:59.204  INFO c.i.agent.service.rag.RagServiceImpl     : [PDF] ParagraphPdfDocumentReader 无结果，降
-级为 PagePdfDocumentReader
-13:28:59.427  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 1
-13:29:00.071  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 9
-13:29:00.299  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 17
-13:29:00.455  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 25
-13:29:00.655  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 33
-13:29:00.766  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 41
-13:29:00.813  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 49
-13:29:00.897  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 57
-13:29:00.987  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 65
-13:29:01.062  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 73
-13:29:01.172  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processing PDF page: 81
-13:29:01.183  INFO o.s.ai.reader.pdf.PagePdfDocumentReader  : Processed total 82 pages        
-13:29:01.184  INFO c.i.agent.service.rag.RagServiceImpl     : 文档解析完成: 共 82 个原始文档段
-13:29:01.230 DEBUG c.i.a.s.r.t.DocumentTextCleaner          : [TextCleaner] 单文档清洗: 移除短噪声行=8, 
-移除页眉页脚行=0
-13:29:01.243  INFO c.i.a.s.r.t.DocumentTextCleaner          : [TextCleaner] 清洗完成: 输入 82 个文档, 输 
-出 82 个, 原文总长=480725, 清洗后总长=68067, 压缩率=85.8%
-13:29:01.244  INFO c.i.agent.service.rag.RagServiceImpl     : 文本清洗完成: 保留 82 个有效文档段（清洗前 
-82）
-13:29:01.247  INFO c.i.a.s.r.transformer.SmartTextSplitter  : [SmartSplitter] 分块完成: 输入 82 个文档,  
-输出 131 个分块, chunkSize=800, overlap=100
-13:29:01.248  INFO c.i.agent.service.rag.RagServiceImpl     : 文本分块完成: 共 131 个分块
-13:29:01.248  INFO c.i.agent.service.rag.RagServiceImpl     : 过滤短文本块完成: 保留 131/131 个有效分块  
-13:29:01.253 DEBUG c.i.a.d.m.K.insert                       : ==>  Preparing: INSERT INTO knowledge_document ( title, domain, file_type, file_path, chunk_count, status, created_at, updated_at ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )
-13:29:01.253 DEBUG c.i.a.d.m.K.insert                       : ==> Parameters: Java并发编程面试题 _ 小林coding(String), java(String), pdf(String), D:\桌面\java\interview agent\uploads\da42bdd5f1c54bc0876c90b21098f5f4.pdf(String), 0(Integer), ACTIVE(String), 2026-04-25T13:29:01.248912400(LocalDateTime), 2026-04-25T13:29:01.248912400(LocalDateTime)
-13:29:01.258 DEBUG c.i.a.d.m.K.insert                       : <==    Updates: 1
-13:29:01.261  INFO c.i.agent.service.rag.RagServiceImpl     : 文档记录已创建: docId=7, title=Java并发编程
-面试题 _ 小林coding
-13:29:09.662  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 10/131
-13:29:11.587  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 20/131
-13:29:13.670  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 30/131
-13:29:15.579  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 40/131
-13:29:17.653  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 50/131
-13:29:19.808  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 60/131
-13:29:22.002  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 70/131
-13:29:24.162  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 80/131
-13:29:26.194  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 90/131
-13:29:28.353  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 100/131
-13:29:30.463  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 110/131
-13:29:32.636  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 120/131
-13:29:34.584  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 130/131
-13:29:34.764  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储进度: 131/131
-13:29:34.764  INFO c.i.agent.service.rag.RagServiceImpl     : 向量存储完成: 成功 131/131 个分块已写入 PGVector
-13:29:34.767 DEBUG c.i.a.d.m.K.updateById                   : ==>  Preparing: UPDATE knowledge_document SET title=?, domain=?, file_type=?, file_path=?, chunk_count=?, created_at=?, updated_at=? WHERE id=? AND 
-status='ACTIVE'
-13:29:34.767 DEBUG c.i.a.d.m.K.updateById                   : ==> Parameters: Java并发编程面试题 _ 小林coding(String), java(String), pdf(String), D:\桌面\java\interview agent\uploads\da42bdd5f1c54bc0876c90b21098f5f4.pdf(String), 131(Integer), 2026-04-25T13:29:01.248912400(LocalDateTime), 2026-04-25T13:29:34.764581500(LocalDateTime), 7(Long)
-13:29:34.771 DEBUG c.i.a.d.m.K.updateById                   : <==    Updates: 1
-13:29:34.772  INFO c.i.agent.service.rag.RagServiceImpl     : 文档导入成功: docId=7, title=Java并发编程面
-试题 _ 小林coding, domain=java, fileType=pdf, 成功chunks=131, 失败chunks=0
-13:29:34.787 DEBUG c.i.a.d.m.K.selectList                   : ==>  Preparing: SELECT id,title,domain,file_type,file_path,chunk_count,status,created_at,updated_at FROM knowledge_document WHERE status='ACTIVE' AND (status = ?) ORDER BY created_at DESC
-13:29:34.788 DEBUG c.i.a.d.m.K.selectList                   : ==> Parameters: ACTIVE(String)
-13:29:34.790 DEBUG c.i.a.d.m.K.selectList                   : <==      Total: 1
+18:37:46.452 DEBUG c.i.a.s.rag.rewrite.QueryRewriteService  : [Query-Rewrite] 触发条件: 问题过短(5 < 20)
+18:37:46.455  INFO c.i.a.s.rag.rewrite.QueryRewriteService  : [Query-Rewrite] 改写判断: query='并发是什么', needsRewrite=true
+18:37:46.456  INFO c.i.a.s.rag.rewrite.QueryRewriteService  : [Query-Rewrite] 开始改写: original='并发是什么'
+18:37:46.460 DEBUG c.i.a.s.rag.rewrite.QueryRewriteService  : [Query-Rewrite] 改写Prompt:
+你是一个面试知识检索助手。请将用户的问题改写成更清晰的技术问题描述。
+
+要求：
+- 展开缩写（如"线程池"→"Java线程池"，"AQS"→"AbstractQueuedSynchronizer"）
+- 口语化转技术化（如"啥意思"→"是什么意思"）
+- 不超过40个字
+- 如果问题已清晰，直接原样输出
+
+用户问题：<query>
+
+改写后：
+18:37:57.505  INFO c.i.a.s.rag.rewrite.QueryRewriteService  : [Query-Rewrite] 改写完成: original='并发是什么' → rewritten='请将用户问题改写为技术问题（如"线程池"→"Java线程池"）'
+18:37:57.506 DEBUG c.i.a.s.rag.rewrite.QueryRewriteService  : [Query-Rewrite] 改写原始输出: '请将用户问题改写为技术问
+题（如"线程池"→"Java线程池"）'
+18:37:57.507  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] Query Rewriting 已改写: '并发是什么' → '请
+将用户问题改写为技术问题（如"线程池"→"Java线程池"）'
+18:37:57.507  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 混合检索模式: query='请将用户问题改写为技 
+术问题（如"线程池"→"Java线程池"）', domain='java', vectorWeight=40, keywordWeight=60, topK=20
+18:37:57.507  INFO c.i.a.s.rag.hybrid.HybridSearchService   : [Hybrid-Search] 混合检索开始: query='请将用户问题改写为
+技术问题（如"线程池"→"Java线程池"）', domain='java', topK=20
+18:37:57.716  INFO c.i.a.s.rag.hybrid.HybridSearchService   : [Hybrid-Search] 向量检索完成: 命中 20 条
+18:37:57.723  INFO c.i.a.s.rag.hybrid.HybridSearchService   : [Hybrid-Search] 关键词检索完成: 命中 0 条
+18:37:57.723  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 检索完成: hybrid=true, 命中 20 条文档     
+18:37:57.723  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[0]: domain=java, title=Java并发编程面
+试题 _ 小林coding, distance=0.33925998, hybrid_score=null, length=790, preview='线程池
+
+线程池怎么使用？
+
+线程池的核心作用是复用线程、控制并发数，避免频繁创建销毁线程带来的性能开销。
+
+首先最常用的是通过 Executors 工具类快速创建线程池，适合简单场景，不用手动配置复'
+18:37:57.724 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[0] 完整内容:
+线程池
+
+线程池怎么使用？
+
+线程池的核心作用是复用线程、控制并发数，避免频繁创建销毁线程带来的性能开销。
+
+首先最常用的是通过 Executors 工具类快速创建线程池，适合简单场景，不用手动配置复杂参数。
+
+比如需要一个固定线程数的线程池，处理一批异步任务：
+
+java
+// 创建固定3个线程的线程池
+ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);
+
+// 提交Runnable任务 无返回值
+for (int i = 0; i < 5; i++) {
+int taskNum = i;
+fixedThreadPool.submit(() -> {
+System.out.println(当前线程 + Thread.currentThread().getName() + 处理任务 + task
+try {
+Thread.sleep(1000); // 模拟任务执行耗时
+} catch (InterruptedException e) {
+Thread.currentThread().interrupt();
+}
+});
+}
+
+// 提交Callable任务 有返回值
+Future<Integer> future = fixedThreadPool.submit(() -> {
+Thread.sleep(500);
+return100 + 200; // 任务返回结果
+});
+
+// 获取Callable任务的返回值 会阻塞直到任务完成
+try {
+Integer result = future.get();
+System.out.println(任务返回结果 + result);
+} catch (Exception e) {
+e.printStackTrace();
+}
+18:37:57.726  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[1]: domain=java, title=Java并发编程面
+试题 _ 小林coding, distance=0.3600359, hybrid_score=null, length=793, preview='任务管理更灵活：线程池支持任务排队、优
+先级调度、拒绝策略等，能应对任务峰值（如秒杀
+
+场景的突发请求） 。而三个线程的并发方式，缺乏这些机制，任务处理逻辑会和业务代码耦合
+
+（如手动写队列、处理超时）'
+18:37:57.726 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[1] 完整内容:
+任务管理更灵活：线程池支持任务排队、优先级调度、拒绝策略等，能应对任务峰值（如秒杀
+
+场景的突发请求） 。而三个线程的并发方式，缺乏这些机制，任务处理逻辑会和业务代码耦合
+
+（如手动写队列、处理超时） 。
+
+比如在接口网关场景中，每秒可能有上百个请求，若用三个线程处理，会导致大量请求排队超
+
+时；而线程池通过合理的核心线程数（如 10） 、队列（如 200）和最大线程数（如 20） ，既能高效
+
+处理请求，又不会因线程过多拖垮系统。
+
+线程池用了哪些设计模式？
+
+线程池的实现中运用了多种设计模式，这些模式共同支撑了其高效的线程管理和任务调度能力，
+
+主要包括：
+
+首先是工厂模式，体现在线程池的创建过程中。Java 中 Executors 类提供的
+
+newFixedThreadPool 、 newCachedThreadPool 等静态方法，本质上是工厂方法，它们封装了
+
+ThreadPoolExecutor 复杂的参数配置，根据不同场景返回预配置的线程池实例，简化了用户创建
+
+线程池的操作。用户无需关心线程池内部参数的细节，只需根据需求选择对应的工厂方法即可。
+
+其次是享元模式，这是线程池的核心设计思想之一。线程池通过复用已创建的线程（尤其是核心
+
+线程）来执行多个任务，避免了频繁创建和销毁线程带来的资源消耗。线程作为 “共享资源”，在
+
+完成一个任务后不会被销毁，而是回到线程池等待新的任务，这种对线程资源的共享复用，正是
+
+享元模式的典型应用，有效提高了系统的资源利用率。
+
+还有生产者 - 消费者模式，体现在任务的提交与执行流程中。用户通过 execute 或 submit 方法
+
+提交任务（生产者） ，任务被放入阻塞队列中；线程池中的工作线程（消费者）不断从队列中取出
+
+任务并执行。阻塞队列作为缓冲区，平衡了生产者和消费者的处理速度，避免了任务提交过快导
+18:37:57.731  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[2]: domain=java, title=Java并发编程面
+试题 _ 小林coding, distance=0.36135155, hybrid_score=null, length=550, preview='另外，提交任务时，submit 和 execute  
+的区别在于 submit 能提交 Callable 有返回值，还能通过
+Future 捕获任务执行中的异常，而 execute 只能提交 Runna'
+18:37:57.731 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[2] 完整内容:
+另外，提交任务时，submit 和 execute 的区别在于 submit 能提交 Callable 有返回值，还能通过
+Future 捕获任务执行中的异常，而 execute 只能提交 Runnable，异常会直接抛出，比如：
+
+java
+// submit捕获异常
+Future<?> future = threadPool.submit(() -> {
+int i = 1 / 0; // 模拟异常
+});
+try {
+future.get();
+} catch (ExecutionException e) {
+System.out.println(任务执行异常 + e.getCause()); // 捕获到算术异常
+}
+
+还有线程池的使用原则：不能创建后不关闭，否则会导致线程泄露，JVM 无法退出；任务队列的
+
+容量要合理设置，太大可能导致内存溢出，太小容易触发拒绝策略；线程数要根据任务类型调
+
+整，CPU 密集型任务（比如复杂计算）线程数不宜过多，一般和 CPU 核心数相当，避免线程切换
+
+开销，IO 密集型任务可以多设些线程，因为线程大部分时间在等待 IO 完成。
+
+介绍一下线程池的工作原理
+
+线程池是为了减少频繁的创建线程和销毁线程带来的性能损耗，线程池的工作原理如下图：
+18:37:57.733  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[3]: domain=java, title=Java并发编程面
+试题 _ 小林coding, distance=0.38507947, hybrid_score=null, length=789, preview='采用实现Callable接口方式：
+
+缺点：编程稍微复杂，如果需要访问当前线程，必须调用Thread.currentThread()方法。
+
+优点：线程只是实现Runnable或实现Callable接'
+18:37:57.734 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[3] 完整内容:
+采用实现Callable接口方式：
+
+缺点：编程稍微复杂，如果需要访问当前线程，必须调用Thread.currentThread()方法。
+
+优点：线程只是实现Runnable或实现Callable接口，还可以继承其他类。这种方式下，多个线程
+
+可以共享一个target对象，非常适合多线程处理同一份资源的情形。
+
+4. 使用线程池（Executor框架）
+
+从Java 5开始引入的java.util.concurrent.ExecutorService和相关类提供了线程池的支持，这是一种
+
+更高效的线程管理方式，避免了频繁创建和销毁线程的开销。可以通过Executors类的静态方法创
+
+建不同类型的线程池。
+
+java
+class Task implements Runnable {
+@Override
+public void run() {
+// 线程执行的代码
+}
+}
+
+public static void main(String[] args) {
+ExecutorService executor = Executors.newFixedThreadPool(10); // 创建固定大小的线程池
+for (int i = 0; i < 100; i++) {
+executor.submit(new Task()); // 提交任务到线程池执行
+}
+executor.shutdown(); // 关闭线程池
+}
+
+采用线程池方式：
+
+缺点：程池增加了程序的复杂度，特别是当涉及线程池参数调整和故障排查时。错误的配置可
+
+能导致死锁、资源耗尽等问题，这些问题的诊断和修复可能较为复杂。
+
+优点：线程池可以重用预先创建的线程，避免了线程创建和销毁的开销，显著提高了程序的性
+
+能。对于需要快速响应的并发请求，线程池可以迅速提供线程来处理任务，减少等待时间。并
+18:37:57.737  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[4]: domain=java, title=Java并发编程面
+试题 _ 小林coding, distance=0.39411902, hybrid_score=null, length=793, preview='SingleThreadExecutor：它会使用唯一的 
+线程去执行任务，原理和 FixedThreadPool 是一样的，
+
+只不过这里线程只有一个，如果线程在执行任务的过程中发生异常，线程池也会重新'
+18:37:57.738 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[4] 完整内容:
+SingleThreadExecutor：它会使用唯一的线程去执行任务，原理和 FixedThreadPool 是一样的，
+
+只不过这里线程只有一个，如果线程在执行任务的过程中发生异常，线程池也会重新创建一个
+
+线程来执行后续的任务。这种线程池由于只有一个线程，所以非常适合用于所有任务都需要按
+
+被提交的顺序依次执行的场景，而前几种线程池不一定能够保障任务的执行顺序等于被提交的
+
+顺序，因为它们是多线程并行执行的。
+SingleThreadScheduledExecutor：它实际和 ScheduledThreadPool 线程池非常相似，它只是
+ScheduledThreadPool 的一个特例，内部只有一个线程。
+
+线程池一般是怎么用的？
+
+Java 中的 Executors 类定义了一些快捷的工具方法，来帮助我们快速创建线程池。 《阿里巴巴 Java
+
+开发手册》中提到，禁止使用这些方法来创建线程池，而应该手动 new ThreadPoolExecutor 来创
+
+建线程池。这一条规则的背后，是大量血淋淋的生产事故，最典型的就是 newFixedThreadPool 和
+newCachedThreadPool，可能因为资源耗尽导致 OOM 问题。
+
+所以，不建议使用 Executors 提供的两种快捷的线程池，原因如下：
+
+我们需要根据自己的场景、并发情况来评估线程池的几个核心参数，包括核心线程数、最大线
+
+程数、线程回收策略、工作队列的类型，以及拒绝策略，确保线程池的工作行为符合需求，一
+
+般都需要设置有界的工作队列和可控的线程数。
+
+任何时候，都应该为自定义线程池指定有意义的名称，以方便排查问题。当出现线程数量暴
+
+增、线程死锁、线程占用大量 CPU、线程执行出现异常等问题时，我们往往会抓取线程栈。此
+
+时，有意义的线程名称，就可以方便我们定位问题。
+18:37:57.742  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[5]: domain=java, title=Java并发编程面
+试题 _ 小林coding, distance=0.39680132, hybrid_score=null, length=287, preview='线程池分为核心线程池，线程池的最大容 
+量，还有等待任务的队列，提交一个任务，如果核心线
+
+程没有满，就创建一个线程，如果满了，就是会加入等待队列，如果等待队列满了，就会增加线
+
+程，如果达到最大线程数量'
+18:37:57.742 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[5] 完整内容:
+线程池分为核心线程池，线程池的最大容量，还有等待任务的队列，提交一个任务，如果核心线
+
+程没有满，就创建一个线程，如果满了，就是会加入等待队列，如果等待队列满了，就会增加线
+
+程，如果达到最大线程数量，如果都达到最大线程数量，就会按照一些丢弃的策略进行处理。
+
+任务执行流程如下：
+
+提交任务 → 核心线程是否已满？
+├─ 未满 → 创建核心线程执行
+└─ 已满 → 任务入队
+├─ 队列未满 → 等待执行
+└─ 队列已满 → 创建非核心线程
+├─ 未达最大线程数 → 执行任务
+└─ 已达最大线程数 → 执行拒绝策略
+
+线程池的参数有哪些？
+
+线程池的构造函数有7个参数：
+18:37:57.743  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[6]: domain=java, title=Java并发编程面
+试题 _ 小林coding, distance=0.39683512, hybrid_score=null, length=199, preview='优点：线程池可以重用预先创建的线程， 
+避免了线程创建和销毁的开销，显著提高了程序的性
+
+能。对于需要快速响应的并发请求，线程池可以迅速提供线程来处理任务，减少等待时间。并
+
+且，线程池能够有效控制运行的'
+18:37:57.744 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[6] 完整内容:
+优点：线程池可以重用预先创建的线程，避免了线程创建和销毁的开销，显著提高了程序的性
+
+能。对于需要快速响应的并发请求，线程池可以迅速提供线程来处理任务，减少等待时间。并
+
+且，线程池能够有效控制运行的线程数量，防止因创建过多线程导致的系统资源耗尽（如内存
+
+溢出） 。通过合理配置线程池大小，可以最大化CPU利用率和系统吞吐量。
+
+怎么启动线程 ？
+
+启动线程的通过Thread类的start()。
+18:37:57.750  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[7]: domain=java, title=Java并发编程面
+试题 _ 小林coding, distance=0.39856777, hybrid_score=null, length=679, preview='// 消费者线程
+Thread consumer = new Thread(() -> {
+try {
+System.out.println("Consumer: Waiting for produc'
+18:37:57.751 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[7] 完整内容:
+// 消费者线程
+Thread consumer = new Thread(() -> {
+try {
+System.out.println("Consumer: Waiting for production to finish.");
+int item = queue.take();
+System.out.println("Consumer: Consumed item: " + item);
+} catch (InterruptedException e) {
+e.printStackTrace();
+}
+});
+
+consumer.start();
+producer.start();
+}
+}
+
+代码解释：
+
+LinkedBlockingQueue 是 BlockingQueue 接口的一个实现类，容量为 1。
+
+生产者线程调用 queue.put(1) 方法将元素插入队列，如果队列已满，线程会被阻塞；消费者
+
+线程调用 queue.take() 方法从队列中取出元素，如果队列为空，线程会被阻塞。
+
+线程间通信方式有哪些？
+
+1、Object 类的 wait()、notify() 和 notifyAll() 方法。这是 Java 中最基础的线程间通信方式，基于
+
+对象的监视器（锁）机制。
+
+wait() ：使当前线程进入等待状态，直到其他线程调用该对象的 notify() 或 notifyAll()
+
+方法。
+
+notify() ：唤醒在此对象监视器上等待的单个线程。
+
+notifyAll() ：唤醒在此对象监视器上等待的所有线程。
+18:37:57.754  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[8]: domain=java, title=Java并发编程面
+试题 _ 小林coding, distance=0.4015184, hybrid_score=null, length=568, preview='当出现线程数量暴
+
+增、线程死锁、线程占用大量 CPU、线程执行出现异常等问题时，我们往往会抓取线程栈。此
+
+时，有意义的线程名称，就可以方便我们定位问题。
+
+除了建议手动声明线程池以外，我还建议用一'
+18:37:57.754 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[8] 完整内容:
+当出现线程数量暴
+
+增、线程死锁、线程占用大量 CPU、线程执行出现异常等问题时，我们往往会抓取线程栈。此
+
+时，有意义的线程名称，就可以方便我们定位问题。
+
+除了建议手动声明线程池以外，我还建议用一些监控手段来观察线程池的状态。线程池这个组件
+
+往往会表现得任劳任怨、默默无闻，除非是出现了拒绝策略，否则压力再大都不会抛出一个异
+
+常。如果我们能提前观察到线程池队列的积压，或者线程数量的快速膨胀，往往可以提早发现并
+
+解决问题。
+
+线程池和三个线程同时并发比有什么优势？
+
+假设业务中需要处理大量并发任务，直接创建三个线程（或每次任务来了新建线程）存在明显局
+
+限，而线程池的优势主要体现在：
+
+资源复用，降低开销：线程创建 / 销毁需要内核态操作（如系统调用） ，开销较大。线程池会复
+
+用核心线程，避免频繁创建线程，尤其在任务量大时，能显著减少资源消耗。而三个固定线程
+
+若任务超过负载，要么排队等待（效率低） ，要么需要临时新建线程（开销高） 。
+
+控制并发强度，避免资源耗尽：线程池通过最大线程数和队列限制并发数，防止线程无限制创
+
+建（比如瞬间 1000 个任务直接创建 1000 个线程，可能导致 CPU / 内存耗尽） 。而三个线程若
+
+面对突发大量任务，要么处理不过来（任务堆积） ，要么手动扩容线程（难以控制） 。
+18:37:57.756  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[9]: domain=java, title=Java并发编程面
+试题 _ 小林coding, distance=0.40153095, hybrid_score=null, length=450, preview='使用 Java 多线程需要注意以下几点：   
+
+首先是线程安全问题。多个线程同时操作共享数据时，可能出现错误。比如两个线程同时给一
+
+个变量加 1，原本该加 2，结果可能只加了 1，这是因为线程切换时没做'
+18:37:57.757 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[9] 完整内容:
+使用 Java 多线程需要注意以下几点：
+
+首先是线程安全问题。多个线程同时操作共享数据时，可能出现错误。比如两个线程同时给一
+
+个变量加 1，原本该加 2，结果可能只加了 1，这是因为线程切换时没做好数据保护。需要用
+
+synchronized 关键字、 Lock 锁等方式，保证同一时间只有一个线程操作共享数据。
+
+其次是线程间通信。线程需要协作时，比如一个线程生产数据，另一个线程消费数据，要通过
+
+wait() 、 notify() 等方法控制，避免出现一方没准备好，另一方就操作的情况，否则可能导
+
+致数据错误或线程无限等待。
+
+然后是线程的创建和销毁成本。频繁创建和销毁线程会消耗系统资源，影响性能。可以用线程
+
+池管理线程，提前创建好一定数量的线程，重复使用，减少资源消耗。
+
+java里面的线程和操作系统的线程一样吗？
+
+Java 底层会调用 pthread_create 来创建线程，所以本质上 java 程序创建的线程，就是和操作系统
+
+线程是一样的，是 1 对 1 的线程模型。
+18:37:57.762  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[10]: domain=java, title=Java并发编程 
+面试题 _ 小林coding, distance=0.40810975, hybrid_score=null, length=472, preview='线程池中的工作线程（消费者）不断从 
+队列中取出
+
+任务并执行。阻塞队列作为缓冲区，平衡了生产者和消费者的处理速度，避免了任务提交过快导
+
+致的线程资源不足，或线程空闲时的资源浪费，实现了任务的异步处理和'
+18:37:57.763 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[10] 完整内容:
+线程池中的工作线程（消费者）不断从队列中取出
+
+任务并执行。阻塞队列作为缓冲区，平衡了生产者和消费者的处理速度，避免了任务提交过快导
+
+致的线程资源不足，或线程空闲时的资源浪费，实现了任务的异步处理和解耦。
+
+另外，线程池还隐式用到了模板方法模式。 ThreadPoolExecutor 的 execute 方法定义了任务执行
+
+的整体流程框架：先尝试添加任务到核心线程，失败则加入队列，再失败则创建非核心线程，最
+
+后执行拒绝策略。这个流程是固定的模板，而具体的任务执行、线程创建等细节则通过重写
+
+beforeExecute 、 afterExecute 等钩子方法进行扩展，用户可以在不改变核心流程的前提下自定
+
+义任务执行前后的操作。
+
+线程池中shutdown ()，shutdownNow()这两个方法有什么作用？
+
+从下面的源码【高亮】注释可以很清晰的看出两者的区别：
+
+shutdown使用了以后会置状态为SHUTDOWN，正在执行的任务会继续执行下去，没有被执行
+
+的则中断。此时，则不能再往线程池中添加任何任务，否则将会抛出
+18:37:57.764  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[11]: domain=java, title=Java并发编程 
+面试题 _ 小林coding, distance=0.41153458, hybrid_score=null, length=94, preview='out.println("Error closing socket: " + e);
+}
+}
+}
+
+调用方式：调用 stop() 方法关闭资源以解除阻塞。
+
+线程停止的正确实践，如下表格：'
+18:37:57.766 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[11] 完整内容:
+out.println("Error closing socket: " + e);
+}
+}
+}
+
+调用方式：调用 stop() 方法关闭资源以解除阻塞。
+
+线程停止的正确实践，如下表格：
+18:37:57.766  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[12]: domain=java, title=Java并发编程 
+面试题 _ 小林coding, distance=0.4162006, hybrid_score=null, length=377, preview='}
+
+取消线程池中任务的方式，代码如下，通过 future 对象的 cancel(boolean) 函数来定向取消特定的
+
+任务。
+
+java
+public static void main(Stri'
+18:37:57.766 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[12] 完整内容:
+}
+
+取消线程池中任务的方式，代码如下，通过 future 对象的 cancel(boolean) 函数来定向取消特定的
+
+任务。
+
+java
+public static void main(String[] args) {
+ExecutorService service = Executors.newSingleThreadExecutor();
+Future future = service.submit(new TheradDemo());
+
+try {
+// 可能抛出异常
+future.get();
+} catch (InterruptedException e) {
+e.printStackTrace();
+} catch (ExecutionException e) {
+e.printStackTrace();
+}finally {
+18:37:57.767  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[13]: domain=java, title=Java并发编程 
+面试题 _ 小林coding, distance=0.41706178, hybrid_score=null, length=359, preview='e）设置的经验：
+
+CPU密集型：corePoolSize = CPU核数 + 1（避免过多线程竞争CPU）
+IO密集型：corePoolSize = CPU核数 x 2（或更高，具体看IO等待时间）'
+18:37:57.767 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[13] 完整内容:
+e）设置的经验：
+
+CPU密集型：corePoolSize = CPU核数 + 1（避免过多线程竞争CPU）
+IO密集型：corePoolSize = CPU核数 x 2（或更高，具体看IO等待时间）
+
+场景一：电商场景，特点瞬时高并发、任务处理时间短，线程池的配置可设置如下：
+
+java
+new ThreadPoolExecutor(
+16， // corePoolSize = 16（假设8核CPU × 2）
+32， // maximumPoolSize = 32（突发流量扩容）
+10， TimeUnit.SECONDS， // 非核心线程空闲10秒回收
+new SynchronousQueue<>()， // 不缓存任务，直接扩容线程
+new AbortPolicy() // 直接拒绝，避免系统过载
+);
+18:37:57.768  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[14]: domain=java, title=Java并发编程 
+面试题 _ 小林coding, distance=0.41714388, hybrid_score=null, length=791, preview='// 任务执行完后关闭线程池 避免资源 
+泄露
+fixedThreadPool.shutdown();
+
+不过 Executors 创建的线程池有潜在问题，比如 newCachedThreadPool 可'
+18:37:57.768 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[14] 完整内容:
+// 任务执行完后关闭线程池 避免资源泄露
+fixedThreadPool.shutdown();
+
+不过 Executors 创建的线程池有潜在问题，比如 newCachedThreadPool 可能创建大量线程导致
+OOM，newScheduledThreadPool 的核心线程数默认无界，所以复杂业务场景更推荐用
+ThreadPoolExecutor 手动配置，能精准控制线程池行为。
+
+手动创建 ThreadPoolExecutor 需要指定 7 个核心参数，理解这些参数才能用好。比如创建一个适
+
+合处理 IO 密集型任务的线程池（IO 密集型任务线程数可以多些，一般是 CPU 核心数的 2 倍） ：
+
+java
+// 获取CPU核心数 用于合理设置线程数
+int corePoolSize = Runtime.getRuntime().availableProcessors() * 2;
+
+// 手动配置线程池
+ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
+corePoolSize， // 核心线程数 线程池长期维持的最小线程数
+corePoolSize * 2， // 最大线程数 线程池能容纳的最多线程数
+60L， // 空闲线程存活时间 超过核心线程数的空闲线程 多久后销毁
+TimeUnit.SECONDS， // 存活时间单位
+new ArrayBlockingQueue<>(100)， // 任务阻塞队列 核心线程忙时 新任务存这里
+Executors.defaultThreadFactory()， // 线程创建工厂 用于设置线程名 优先级等
+new ThreadPoolExecutor.AbortPolicy() // 拒绝策略 队列满且线程数达最大时 如何处理新任务
+);
+18:37:57.770  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[15]: domain=java, title=Java并发编程 
+面试题 _ 小林coding, distance=0.41765988, hybrid_score=null, length=790, preview='// 创建Thread对象并传入Runnable    
+Thread thread1 = new Thread(task， "线程1");
+Thread thread2 = new Thread(task，'
+18:37:57.771 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[15] 完整内容:
+// 创建Thread对象并传入Runnable
+Thread thread1 = new Thread(task， "线程1");
+Thread thread2 = new Thread(task， "线程2");
+Thread thread3 = new Thread(task， "线程3");
+
+thread1.start();
+thread2.start();
+thread3.start();
+}
+}
+
+通信机制也有很大差异。Java线程之间通信主要靠共享内存，需要用synchronized、Lock这些同步
+
+机制来保证线程安全，还要小心处理死锁、竞态条件这些问题，写起来比较容易出错。Go虽然也
+
+支持共享内存和锁，但它更提倡用channel来通信，有句话叫"不要通过共享内存来通信，而要通过
+
+通信来共享内存"。用channel的话，代码会更清晰，也更不容易出现并发问题。
+
+性能上来说，因为Go协程的轻量级特性和高效的调度器，在高并发场景下，Go的表现通常会更
+
+好。比如说要处理几万个并发请求，Java可能需要用复杂的异步框架或者线程池来优化，而Go直
+
+接为每个请求开一个协程就行了，代码简单性能还好。当然这不是说Java不行，Java在企业级应
+
+用、生态完善性这些方面还是有很大优势的，只是在并发模型的设计上，Go确实更现代化一些。
+
+从我实际使用的感受来说，如果是写IO密集型的高并发服务，比如API网关、聊天服务器这种，Go
+
+的协程模型开发效率高，性能也好。但如果是传统的企业级应用，需要用到大量的中间件和框
+
+架，Java的生态会更成熟一些。两者各有优势，选择哪个还是要看具体场景。
+
+并发安全
+
+juc包下你常用的类？
+
+线程池相关：
+
+ThreadPoolExecutor ：最核心的线程池类，用于创建和管理线程池。通过它可以灵活地配置线
+18:37:57.772  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[16]: domain=java, title=Java并发编程 
+面试题 _ 小林coding, distance=0.4179795, hybrid_score=null, length=559, preview='RejectedExecutionException 异常     
+
+而 shutdownNow 为STOP，并试图停止所有正在执行的线程，不再处理还在池队列中等待的任
+
+务，当然，它会返回那些未执行的任务。'
+18:37:57.773 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[16] 完整内容:
+RejectedExecutionException 异常
+
+而 shutdownNow 为STOP，并试图停止所有正在执行的线程，不再处理还在池队列中等待的任
+
+务，当然，它会返回那些未执行的任务。 它试图终止线程的方法是通过调用 Thread.interrupt()
+
+方法来实现的，但是这种方法的作用有限，如果线程中没有sleep 、wait、Condition、定时锁等
+
+应用， interrupt()方法是无法中断当前的线程的。所以，ShutdownNow()并不代表线程池就一
+
+定立即就能退出，它可能必须要等待所有正在执行的任务都执行完成了才能退出。
+
+shutdown 源码：
+
+java
+public void shutdown() {
+final ReentrantLock mainLock = this.mainLock;
+mainLock.lock();
+try {
+checkShutdownAccess();
+// 高亮
+advanceRunState(SHUTDOWN);
+interruptIdleWorkers();
+onShutdown();
+} finally {
+mainLock.unlock();
+}
+tryTerminate();
+}
+
+shutdownNow 源码：
+18:37:57.775  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[17]: domain=java, title=Java并发编程 
+面试题 _ 小林coding, distance=0.4192724, hybrid_score=null, length=710, preview='return tasks;
+}
+
+提交给线程池中的任务可以被撤回吗？
+
+可以，当向线程池提交任务时，会得到一个 Future 对象。这个 Future 对象提供了几种方法来管
+
+理任务的执行，包括取消'
+18:37:57.775 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[17] 完整内容:
+return tasks;
+}
+
+提交给线程池中的任务可以被撤回吗？
+
+可以，当向线程池提交任务时，会得到一个 Future 对象。这个 Future 对象提供了几种方法来管
+
+理任务的执行，包括取消任务。
+
+取消任务的主要方法是 Future 接口中的 cancel(boolean mayInterruptIfRunning) 方法。这个方
+
+法尝试取消执行的任务。参数 mayInterruptIfRunning 指示是否允许中断正在执行的任务。如果设
+
+置为 true ，则表示如果任务已经开始执行，那么允许中断任务；如果设置为 false ，任务已经
+
+开始执行则不会被中断。
+
+java
+public interface Future<V> {
+// 是否取消线程的执行
+boolean cancel(boolean mayInterruptIfRunning);
+// 线程是否被取消
+boolean isCancelled();
+//线程是否执行完毕
+boolean isDone();
+// 立即获得线程返回的结果
+V get() throws InterruptedException， ExecutionException;
+// 延时时间后再获得线程返回的结果
+V get(long timeout， TimeUnit unit)
+throws InterruptedException， ExecutionException， TimeoutException;
+}
+
+取消线程池中任务的方式，代码如下，通过 future 对象的 cancel(boolean) 函数来定向取消特定的
+
+任务。
+18:37:57.777  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[18]: domain=java, title=Java并发编程 
+面试题 _ 小林coding, distance=0.42146203, hybrid_score=null, length=510, preview='方法 适用场景 注意事项
+
+循环检测标 确保标志位使用 volatile 或通过锁保 简单无阻塞的逻辑志位 证可见性
+正确处理 InterruptedException 并恢复 中断机制 可中断的阻塞'
+18:37:57.777 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[18] 完整内容:
+方法 适用场景 注意事项
+
+循环检测标 确保标志位使用 volatile 或通过锁保 简单无阻塞的逻辑志位 证可见性
+正确处理 InterruptedException 并恢复 中断机制 可中断的阻塞操作中断标志
+Future.cance
+l() 线程池管理任务 需要线程池任务支持中断处理机制
+
+不可中断的阻塞操作（如 显式关闭资源触发异常，结合中断状态判 资源关闭 Sockets） 断回滚
+
+避免使用以下已废弃方法：
+
+Thread.stop() ：暴力终止，可能导致状态不一致。
+
+Thread.suspend() / resume() ：易导致死锁。
+
+Go 的协程和 Java 的线程有啥区别？
+
+Go的协程和Java的线程确实有很大区别，我从几个方面来说一下。
+
+首先最核心的区别是它们的调度模型不一样。Java的线程是操作系统级别的线程，也就是我们说的
+
+内核线程，一个Java线程对应一个操作系统线程，它的创建、销毁、调度都是由操作系统内核来管
+
+理的。
+
+而Go的协程，也就是goroutine，它是用户态的轻量级线程，是由Go运行时自己调度的，不需要经
+
+过操作系统内核。这就导致了很多后续的差异。
+18:37:57.779  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[19]: domain=java, title=Java基础面试
+题 _ 小林coding, distance=0.42549166, hybrid_score=null, length=799, preview='} else {
+System.out.println("未登录，直接返回失败");
+// 校验不通过，终止链路
+returnfalse;
+}
+}
+}
+
+再写个权限校验节点、频率限制节点，最后在使用的'
+18:37:57.781 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] 结果[19] 完整内容:
+} else {
+System.out.println("未登录，直接返回失败");
+// 校验不通过，终止链路
+returnfalse;
+}
+}
+}
+
+再写个权限校验节点、频率限制节点，最后在使用的时候，根据接口需求动态组装链路：
+
+java
+// 组装链路：登录校验 -> 权限校验 -> 频率限制
+Handler loginHandler = new LoginHandler();
+Handler authHandler = new AuthHandler();
+Handler rateLimitHandler = new RateLimitHandler();
+loginHandler.setNext(authHandler);
+authHandler.setNext(rateLimitHandler);
+
+// 发起请求
+Request request = new Request(true, "admin", 1); // 已登录、管理员权限、第1次请求
+boolean result = loginHandler.handle(request);
+
+这样一来，请求发起方只需要调用第一个节点，根本不用关心后面有多少校验步骤，也不用知道
+
+具体是哪个节点在处理；如果某个接口不需要频率限制，直接去掉 rateLimitHandler 的组装就行，
+
+不用修改任何校验节点的代码，流程调整起来特别灵活。
+
+介绍一下策略模式和责任链模式，分别用在哪些场景？
+
+这两个设计模式都属于行为型模式，而且在实际开发中，它们往往都是为了解决同一个痛点：如
+
+何消除代码中复杂的 **if-else** 或 **switch-case** 逻辑，从而让系统更易于扩展。
+
+策略模式
+
+策略模式定义一系列算法，把它们一个个封装起来，并且使它们可相互替换。从而让算法可独立
+
+于使用它的客户而变化。
+18:37:57.783  INFO i.a.s.r.r.RerankingDocumentPostProcessor : [Rerank] 调用 TEI Reranker: url=http://localhost:8081/rerank, query='并发是什么', candidateCount=20
+18:38:39.280  INFO i.a.s.r.r.RerankingDocumentPostProcessor : [Rerank] #1: score=0.4646, content='// 创建Thread对象并
+传入Runnable
+Thread thread1 = new Thread(task， "线程1");
+Thread thread'
+18:38:39.280  INFO i.a.s.r.r.RerankingDocumentPostProcessor : [Rerank] #2: score=0.4488, content='当出现线程数量暴   
+
+增、线程死锁、线程占用大量 CPU、线程执行出现异常等问题时，我们往往会抓取线程栈。此
+
+时，有意义的线程名称，就可以方便我们定位问题。
+
+'
+18:38:39.281  INFO i.a.s.r.r.RerankingDocumentPostProcessor : [Rerank] #3: score=0.4420, content='任务管理更灵活：线 
+程池支持任务排队、优先级调度、拒绝策略等，能应对任务峰值（如秒杀
+
+场景的突发请求） 。而三个线程的并发方式，缺乏这些机制，任务处理逻辑会和业'
+18:38:39.281  INFO i.a.s.r.r.RerankingDocumentPostProcessor : [Rerank] #4: score=0.4345, content='优点：线程池可以重 
+用预先创建的线程，避免了线程创建和销毁的开销，显著提高了程序的性
+
+能。对于需要快速响应的并发请求，线程池可以迅速提供线程来处理任务，减少等待'
+18:38:39.282  INFO i.a.s.r.r.RerankingDocumentPostProcessor : [Rerank] #5: score=0.4161, content='SingleThreadExecutor：它会使用唯一的线程去执行任务，原理和 FixedThreadPool 是一样的，
+
+只不过这里线程只有一个，如果线程在'
+18:38:39.282  INFO i.a.s.r.r.RerankingDocumentPostProcessor : [Rerank] 精排完成: 输入=20个文档, 输出=5个文档, 耗时=41499ms
+18:38:39.282  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Search] Reranking 精排完成: 原始=20条 → 精排=5条  
+18:38:39.284 DEBUG c.i.a.d.m.ChatMessageMapper.selectList   : ==>  Preparing: SELECT id,session_id,role,content,tokens_used,created_at FROM chat_message WHERE (session_id = ?) ORDER BY created_at ASC LIMIT 20
+18:38:39.285 DEBUG c.i.a.d.m.ChatMessageMapper.selectList   : ==> Parameters: 76df168b9caf40539a78a3490cb6be70(String)
+18:38:39.287 DEBUG c.i.a.d.m.ChatMessageMapper.selectList   : <==      Total: 0
+18:38:39.287  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Prompt] 构建完成: model=qwen3:1.7b, similarDocs=5, contextLength=3389, historyCount=0, totalMessages=2, userMessage='并发是什么'
+18:38:39.288 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Prompt] RAG上下文内容:
+【来源: java / Java并发编程面试题 _ 小林coding - 第43段】
+// 创建Thread对象并传入Runnable
+Thread thread1 = new Thread(task， "线程1");
+Thread thread2 = new Thread(task， "线程2");
+Thread thread3 = new Thread(task， "线程3");
+
+thread1.start();
+thread2.start();
+thread3.start();
+}
+}
+
+通信机制也有很大差异。Java线程之间通信主要靠共享内存，需要用synchronized、Lock这些同步
+
+机制来保证线程安全，还要小心处理死锁、竞态条件这些问题，写起来比较容易出错。Go虽然也
+
+支持共享内存和锁，但它更提倡用channel来通信，有句话叫"不要通过共享内存来通信，而要通过
+
+通信来共享内存"。用channel的话，代码会更清晰，也更不容易出现并发问题。
+
+性能上来说，因为Go协程的轻量级特性和高效的调度器，在高并发场景下，Go的表现通常会更
+
+好。比如说要处理几万个并发请求，Java可能需要用复杂的异步框架或者线程池来优化，而Go直
+
+接为每个请求开一个协程就行了，代码简单性能还好。当然这不是说Java不行，Java在企业级应
+
+用、生态完善性这些方面还是有很大优势的，只是在并发模型的设计上，Go确实更现代化一些。
+
+从我实际使用的感受来说，如果是写IO密集型的高并发服务，比如API网关、聊天服务器这种，Go
+
+的协程模型开发效率高，性能也好。但如果是传统的企业级应用，需要用到大量的中间件和框
+
+架，Java的生态会更成熟一些。两者各有优势，选择哪个还是要看具体场景。
+
+并发安全
+
+juc包下你常用的类？
+
+线程池相关：
+
+ThreadPoolExecutor ：最核心的线程池类，用于创建和管理线程池。通过它可以灵活地配置线
+
+---
+
+【来源: java / Java并发编程面试题 _ 小林coding - 第114段】
+当出现线程数量暴
+
+增、线程死锁、线程占用大量 CPU、线程执行出现异常等问题时，我们往往会抓取线程栈。此
+
+时，有意义的线程名称，就可以方便我们定位问题。
+
+除了建议手动声明线程池以外，我还建议用一些监控手段来观察线程池的状态。线程池这个组件
+
+往往会表现得任劳任怨、默默无闻，除非是出现了拒绝策略，否则压力再大都不会抛出一个异
+
+常。如果我们能提前观察到线程池队列的积压，或者线程数量的快速膨胀，往往可以提早发现并
+
+解决问题。
+
+线程池和三个线程同时并发比有什么优势？
+
+假设业务中需要处理大量并发任务，直接创建三个线程（或每次任务来了新建线程）存在明显局
+
+限，而线程池的优势主要体现在：
+
+资源复用，降低开销：线程创建 / 销毁需要内核态操作（如系统调用） ，开销较大。线程池会复
+
+用核心线程，避免频繁创建线程，尤其在任务量大时，能显著减少资源消耗。而三个固定线程
+
+若任务超过负载，要么排队等待（效率低） ，要么需要临时新建线程（开销高） 。
+
+控制并发强度，避免资源耗尽：线程池通过最大线程数和队列限制并发数，防止线程无限制创
+
+建（比如瞬间 1000 个任务直接创建 1000 个线程，可能导致 CPU / 内存耗尽） 。而三个线程若
+
+面对突发大量任务，要么处理不过来（任务堆积） ，要么手动扩容线程（难以控制） 。
+
+---
+
+【来源: java / Java并发编程面试题 _ 小林coding - 第115段】
+任务管理更灵活：线程池支持任务排队、优先级调度、拒绝策略等，能应对任务峰值（如秒杀
+
+场景的突发请求） 。而三个线程的并发方式，缺乏这些机制，任务处理逻辑会和业务代码耦合
+
+（如手动写队列、处理超时） 。
+
+比如在接口网关场景中，每秒可能有上百个请求，若用三个线程处理，会导致大量请求排队超
+
+时；而线程池通过合理的核心线程数（如 10） 、队列（如 200）和最大线程数（如 20） ，既能高效
+
+处理请求，又不会因线程过多拖垮系统。
+
+线程池用了哪些设计模式？
+
+线程池的实现中运用了多种设计模式，这些模式共同支撑了其高效的线程管理和任务调度能力，
+
+主要包括：
+
+首先是工厂模式，体现在线程池的创建过程中。Java 中 Executors 类提供的
+
+newFixedThreadPool 、 newCachedThreadPool 等静态方法，本质上是工厂方法，它们封装了
+
+ThreadPoolExecutor 复杂的参数配置，根据不同场景返回预配置的线程池实例，简化了用户创建
+
+线程池的操作。用户无需关心线程池内部参数的细节，只需根据需求选择对应的工厂方法即可。
+
+其次是享元模式，这是线程池的核心设计思想之一。线程池通过复用已创建的线程（尤其是核心
+
+线程）来执行多个任务，避免了频繁创建和销毁线程带来的资源消耗。线程作为 “共享资源”，在
+
+完成一个任务后不会被销毁，而是回到线程池等待新的任务，这种对线程资源的共享复用，正是
+
+享元模式的典型应用，有效提高了系统的资源利用率。
+
+还有生产者 - 消费者模式，体现在任务的提交与执行流程中。用户通过 execute 或 submit 方法
+
+提交任务（生产者） ，任务被放入阻塞队列中；线程池中的工作线程（消费者）不断从队列中取出
+
+任务并执行。阻塞队列作为缓冲区，平衡了生产者和消费者的处理速度，避免了任务提交过快导
+
+---
+
+【来源: java / Java并发编程面试题 _ 小林coding - 第11段】
+优点：线程池可以重用预先创建的线程，避免了线程创建和销毁的开销，显著提高了程序的性
+
+能。对于需要快速响应的并发请求，线程池可以迅速提供线程来处理任务，减少等待时间。并
+
+且，线程池能够有效控制运行的线程数量，防止因创建过多线程导致的系统资源耗尽（如内存
+
+溢出） 。通过合理配置线程池大小，可以最大化CPU利用率和系统吞吐量。
+
+怎么启动线程 ？
+
+启动线程的通过Thread类的start()。
+
+---
+
+【来源: java / Java并发编程面试题 _ 小林coding - 第113段】
+SingleThreadExecutor：它会使用唯一的线程去执行任务，原理和 FixedThreadPool 是一样的，
+
+只不过这里线程只有一个，如果线程在执行任务的过程中发生异常，线程池也会重新创建一个
+
+线程来执行后续的任务。这种线程池由于只有一个线程，所以非常适合用于所有任务都需要按
+
+被提交的顺序依次执行的场景，而前几种线程池不一定能够保障任务的执行顺序等于被提交的
+
+顺序，因为它们是多线程并行执行的。
+SingleThreadScheduledExecutor：它实际和 ScheduledThreadPool 线程池非常相似，它只是
+ScheduledThreadPool 的一个特例，内部只有一个线程。
+
+线程池一般是怎么用的？
+
+Java 中的 Executors 类定义了一些快捷的工具方法，来帮助我们快速创建线程池。 《阿里巴巴 Java
+
+开发手册》中提到，禁止使用这些方法来创建线程池，而应该手动 new ThreadPoolExecutor 来创
+
+建线程池。这一条规则的背后，是大量血淋淋的生产事故，最典型的就是 newFixedThreadPool 和
+newCachedThreadPool，可能因为资源耗尽导致 OOM 问题。
+
+所以，不建议使用 Executors 提供的两种快捷的线程池，原因如下：
+
+我们需要根据自己的场景、并发情况来评估线程池的几个核心参数，包括核心线程数、最大线
+
+程数、线程回收策略、工作队列的类型，以及拒绝策略，确保线程池的工作行为符合需求，一
+
+般都需要设置有界的工作队列和可控的线程数。
+
+任何时候，都应该为自定义线程池指定有意义的名称，以方便排查问题。当出现线程数量暴
+
+增、线程死锁、线程占用大量 CPU、线程执行出现异常等问题时，我们往往会抓取线程栈。此
+
+时，有意义的线程名称，就可以方便我们定位问题。
+18:38:39.293 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Prompt] System Prompt内容:
+你是一位专业的面试智能助手。请根据以下检索到的参考资料来回答用户的问题。
+
+要求：
+1. 优先基于参考资料回答，不要编造参考资料中没有的内容
+2. 如果参考资料不足以完整回答，可以补充你的知识，但必须明确标注"【补充】"
+3. 引用参考资料时，使用上下文中【来源: 领域 / 文档标题 - 第N段】的格式标注出处，不要编造来源
+4. 回答使用中文，结构清晰，使用 Markdown 格式
+5. 如果参考资料与问题无关，说明未找到相关资料，基于自身知识回答
+
+参考资料：
+<context>
+
+用户问题：<question>
+
+18:38:39.296 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==>  Preparing: INSERT INTO chat_message ( session_id, 
+role, content, created_at ) VALUES ( ?, ?, ?, ? )
+18:38:39.296 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==> Parameters: 76df168b9caf40539a78a3490cb6be70(String), user(String), 并发是什么(String), 2026-04-29T18:38:39.295577(LocalDateTime)
+18:38:39.376 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : <==    Updates: 1
+18:38:41.901 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==>  Preparing: INSERT INTO chat_message ( session_id, 
+role, content, created_at ) VALUES ( ?, ?, ?, ? )
+18:38:41.902 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : ==> Parameters: 76df168b9caf40539a78a3490cb6be70(String), assistant(String), 并发（Concurrency）是指多个任务或进程在一段时间内交替执行，它们的执行顺序不是严格的顺序，而是交
+错进行。并发是计算机系统中的一种重要特性，用于提高系统的效率和响应能力。
+
+在并发系统中，多个任务可以同时进行，例如在多线程编程中，多个线程可以同时执行。并发通常涉及资源共享、同步机制、死锁、 
+资源竞争等问题。
+
+【补充】
+并发与并行不同，后者指的是多个任务同时执行，而并发则是任务交替执行。在现代计算机系统中，通常通过多核处理器、多线程技 
+术等实现并发。并发的实现需要操作系统提供相应的支持，如进程调度、线程管理等。
+
+参考资料：
+【来源: 计算机科学基础 - 第1段】(String), 2026-04-29T18:38:41.898622300(LocalDateTime)
+18:38:41.908 DEBUG c.i.a.d.mapper.ChatMessageMapper.insert  : <==    Updates: 1
+18:38:41.908  INFO c.i.agent.service.rag.RagServiceImpl     : [RAG-Stream] LLM流式响应完成: sessionId=76df168b9caf40539a78a3490cb6be70, 响应长度=287
+18:38:41.908 DEBUG c.i.agent.service.rag.RagServiceImpl     : [RAG-Stream] LLM流式响应内容:
+并发（Concurrency）是指多个任务或进程在一段时间内交替执行，它们的执行顺序不是严格的顺序，而是交错进行。并发是计算机系
+统中的一种重要特性，用于提高系统的效率和响应能力。
+
+在并发系统中，多个任务可以同时进行，例如在多线程编程中，多个线程可以同时执行。并发通常涉及资源共享、同步机制、死锁、 
+资源竞争等问题。
+
+【补充】
+并发与并行不同，后者指的是多个任务同时执行，而并发则是任务交替执行。在现代计算机系统中，通常通过多核处理器、多线程技 
+术等实现并发。并发的实现需要操作系统提供相应的支持，如进程调度、线程管理等。
+
+参考资料：
+【来源: 计算机科学基础 - 第1段】
+18:38:41.922 DEBUG c.i.a.d.m.ChatSessionMapper.selectList   : ==>  Preparing: SELECT id,session_id,title,domain,model_name,created_at FROM chat_session ORDER BY created_at DESC
+18:38:41.922 DEBUG c.i.a.d.m.ChatSessionMapper.selectList   : ==> Parameters:
+18:38:41.925 DEBUG c.i.a.d.m.ChatSessionMapper.selectList   : <==      Total: 9

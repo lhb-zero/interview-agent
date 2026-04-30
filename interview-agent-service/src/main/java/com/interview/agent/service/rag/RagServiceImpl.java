@@ -12,8 +12,11 @@ import com.interview.agent.model.entity.ChatSession;
 import com.interview.agent.model.entity.KnowledgeDocument;
 import com.interview.agent.model.vo.ChatMessageVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.interview.agent.service.rag.hybrid.HybridSearchProperties;
+import com.interview.agent.service.rag.hybrid.HybridSearchService;
 import com.interview.agent.service.rag.reranker.RerankingDocumentPostProcessor;
 import com.interview.agent.service.rag.reranker.RerankerProperties;
+import com.interview.agent.service.rag.rewrite.QueryRewriteService;
 import com.interview.agent.service.rag.transformer.DocumentTextCleaner;
 import com.interview.agent.service.rag.transformer.SmartTextSplitter;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +70,9 @@ public class RagServiceImpl implements RagService {
     private final DocumentTextCleaner documentTextCleaner;
     private final RerankingDocumentPostProcessor rerankingPostProcessor;
     private final RerankerProperties rerankerProperties;
+    private final HybridSearchService hybridSearchService;
+    private final HybridSearchProperties hybridProperties;
+    private final QueryRewriteService queryRewriteService;
     private final KnowledgeDocumentMapper documentMapper;
     private final ChatSessionMapper sessionMapper;
     private final ChatMessageMapper messageMapper;
@@ -417,39 +423,66 @@ public class RagServiceImpl implements RagService {
      * - Cross-Encoder 在 Transformer 每一层都有 query-doc 注意力交互，精度远高于余弦相似度
      *
      * 降级策略：Reranker 不可用时自动降级为纯向量检索结果
+     *
+     * 混合检索扩展（Phase 2）：
+     * - 向量检索擅长语义匹配（"线程池" ↔ "Thread Pool"）
+     * - 关键词检索擅长精确匹配（"ThreadPoolExecutor" 完全一致）
+     * - RRF（Reciprocal Rank Fusion）将两路结果按排名融合，兼顾语义和精确
+     *
+     * Phase 3 查询改写（Query Rewriting）：
+     * - 用户原始问题 → LLM 改写为更适合检索的形式 → 用改写后的 query 检索
+     * - 触发条件：问题过短(<10字) / 包含口语化词汇 / 包含指代词
+     * - 业界方案参考：Dify rewrite-angular / RAGFlow 意图识别 / LlamaIndex HyDE
      */
     private List<Document> searchSimilarDocs(String query, String domain) {
-        // 向量检索阶段：扩大召回量（为 Reranker 提供足够候选集）
+        String rewrittenQuery = queryRewriteService.rewriteIfNeeded(query);
+        if (!rewrittenQuery.equals(query)) {
+            log.info("[RAG-Search] Query Rewriting 已改写: '{}' → '{}'", query, rewrittenQuery);
+        }
+        String searchQuery = rewrittenQuery;
+
         int candidateCount = rerankerProperties.isEnabled()
                 ? rerankerProperties.getCandidateCount()
                 : CommonConstant.RAG_DEFAULT_TOP_K;
 
-        SearchRequest.Builder builder = SearchRequest.builder()
-                .query(query)
-                .topK(candidateCount)
-                .similarityThreshold(SIMILARITY_THRESHOLD);
+        List<Document> results;
+        boolean hybridSearchPerformed = false;
 
-        if (domain != null && !domain.isEmpty()) {
-            builder.filterExpression("domain == '" + domain.toLowerCase() + "'");
+        if (hybridProperties.isEnabled()) {
+            log.info("[RAG-Search] 混合检索模式: query='{}', domain='{}', vectorWeight={}, keywordWeight={}, topK={}",
+                    searchQuery, domain, hybridProperties.getVectorWeight(), hybridProperties.getKeywordWeight(), hybridProperties.getTopK());
+            results = hybridSearchService.hybridSearch(searchQuery, domain, candidateCount);
+            hybridSearchPerformed = true;
+        } else {
+            SearchRequest.Builder builder = SearchRequest.builder()
+                    .query(searchQuery)
+                    .topK(candidateCount)
+                    .similarityThreshold(SIMILARITY_THRESHOLD);
+
+            if (domain != null && !domain.isEmpty()) {
+                builder.filterExpression("domain == '" + domain.toLowerCase() + "'");
+            }
+
+            SearchRequest searchRequest = builder.build();
+            log.info("[RAG-Search] 向量检索: query='{}', domain='{}', topK={}, threshold={}, rerankerEnabled={}",
+                    searchQuery, domain, candidateCount, SIMILARITY_THRESHOLD, rerankerProperties.isEnabled());
+
+            results = vectorStore.similaritySearch(searchRequest);
         }
 
-        SearchRequest searchRequest = builder.build();
-        log.info("[RAG-Search] 向量检索: query='{}', domain='{}', topK={}, threshold={}, rerankerEnabled={}",
-                query, domain, candidateCount, SIMILARITY_THRESHOLD, rerankerProperties.isEnabled());
-
-        List<Document> results = vectorStore.similaritySearch(searchRequest);
-        log.info("[RAG-Search] 检索完成: 命中 {} 条文档", results.size());
+        log.info("[RAG-Search] 检索完成: hybrid={}, 命中 {} 条文档", hybridSearchPerformed, results.size());
 
         for (int i = 0; i < results.size(); i++) {
             Document doc = results.get(i);
             String docDomain = (String) doc.getMetadata().getOrDefault("domain", "");
             String docTitle = (String) doc.getMetadata().getOrDefault("title", "");
             Object distance = doc.getMetadata().get("distance");
+            Object hybridScore = doc.getMetadata().get("hybrid_score");
             String text = doc.getText();
             String preview = text != null ? text.substring(0, Math.min(100, text.length())) : "null";
-            log.info("[RAG-Search] 结果[{}]: domain={}, title={}, distance={}, length={}, preview='{}'",
-                    i, docDomain, docTitle, distance, text != null ? text.length() : 0, preview);
-            log.debug("[RAG-Search] 结果[{}] 完整内容:\n{}", i, text);
+            log.info("[RAG-Search] 结果[{}]: domain={}, title={}, distance={}, hybrid_score={}, length={}, preview='{}'",
+                    i, docDomain, docTitle, distance, hybridScore, text != null ? text.length() : 0, preview);
+            // log.debug("[RAG-Search] 结果[{}] 完整内容:\n{}", i, text);
         }
 
         // Reranking 精排阶段
@@ -460,7 +493,7 @@ public class RagServiceImpl implements RagService {
             if (hasReranked) {
                 log.info("[RAG-Search] Reranking 精排完成: 原始={}条 → 精排={}条", results.size(), rerankedDocs.size());
             } else {
-                log.warn("[RAG-Search] Reranking 失败，降级使用原始向量检索结果: {}条", results.size());
+                log.warn("[RAG-Search] Reranking 失败，降级使用原始检索结果: {}条", results.size());
             }
             return rerankedDocs;
         }

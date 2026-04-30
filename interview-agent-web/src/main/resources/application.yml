@@ -68,7 +68,54 @@ app:
     # Cross-Encoder 输出的分数范围取决于模型，bge-reranker-v2-m3 通常 0~1
     score-threshold: 0.0
     # 单次 Rerank 请求超时（毫秒）
-    timeout-ms: 60000
+    timeout-ms: 1200000
+
+  # ==================== 混合检索配置 ====================
+  # 混合检索 = 向量检索(Dense) + 关键词检索(Sparse) → RRF 融合排序
+  # 原理：
+  # - 向量检索擅长语义匹配（"线程池" ↔ "Thread Pool"）
+  # - 关键词检索擅长精确匹配（"ThreadPoolExecutor" 完全一致）
+  # - RRF（Reciprocal Rank Fusion）将两路结果按排名融合，兼顾语义和精确
+  # 适用场景：专有名词（类名/方法名）检索命中率大幅提升
+  hybrid-search:
+    # 是否启用混合检索（关闭后仅走向量检索）
+    enabled: true
+    # 向量检索权重（百分比），关键词检索权重 = 100 - vectorWeight
+    vector-weight: 40
+    # 关键词检索权重
+    keyword-weight: 60
+    # 混合检索总候选数（两路各召回此数量的结果后再融合）
+    top-k: 20
+    # RRF 融合公式的分母参数 k（业界经验值 60）
+    # RRF_score = weight * (1 / (k + rank))
+    rrf-k: 60.0
+    # 是否启用关键词检索
+    keyword-search-enabled: true
+    # 关键词匹配模式：contains（任一关键词匹配）/ all（全部关键词匹配）
+    keyword-match-mode: contains
+
+  # ==================== 查询改写配置 (Phase 3) ====================
+  # 查询改写 = Query Rewriting，解决用户提问质量差的问题
+  # 原理：用户原始问题 → LLM 改写为更适合检索的形式 → 用改写后的 query 检索
+  # 效果示例：
+  # - "怎么解决死锁？" → "Java多线程死锁的原因、检测方法和避免策略"
+  # - "线程池是啥" → "Java线程池ThreadPoolExecutor的原理、参数配置和使用方法"
+  # 触发条件：口语化词汇 / 包含指代词（问题过短默认不触发，1.7b模型改写质量不稳定）
+  # 业界方案参考：Dify rewrite-angular / RAGFlow 意图识别 / LlamaIndex HyDE
+  query-rewrite:
+    # 是否启用查询改写（关闭后所有问题直接检索）
+    enabled: true
+    # 问题过短阈值（低于此字数认为需要改写展开）
+    # 注意：1.7b小模型改写质量不稳定，过短判断会误伤清晰问题，建议设为较大值
+    min-query-length: 10
+    # 单次改写超时（毫秒）
+    timeout-ms: 30000
+    # 是否在问题过短时触发改写（小模型建议关闭，避免误改）
+    need-rewrite-when-short: true
+    # 是否在包含口语化词汇时触发改写（啥/怎么/怎样/咋/咋办/啥意思等）
+    need-rewrite-when-colloquial: true
+    # 是否在包含指代词时触发改写（它/这个/那个/上面/前文等）
+    need-rewrite-when-has-pronoun: true
 
 # ==================== MyBatis-Plus 配置 ====================
 mybatis-plus:

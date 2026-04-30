@@ -1,8 +1,11 @@
 package com.interview.agent.service.tool;
 
 import com.interview.agent.common.constant.CommonConstant;
+import com.interview.agent.service.rag.hybrid.HybridSearchProperties;
+import com.interview.agent.service.rag.hybrid.HybridSearchService;
 import com.interview.agent.service.rag.reranker.RerankingDocumentPostProcessor;
 import com.interview.agent.service.rag.reranker.RerankerProperties;
+import com.interview.agent.service.rag.rewrite.QueryRewriteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
@@ -31,6 +34,9 @@ public class KnowledgeSearchTool {
     private final VectorStore vectorStore;
     private final RerankingDocumentPostProcessor rerankingPostProcessor;
     private final RerankerProperties rerankerProperties;
+    private final HybridSearchService hybridSearchService;
+    private final HybridSearchProperties hybridProperties;
+    private final QueryRewriteService queryRewriteService;
 
     @Tool(description = "从面试知识库中检索与用户问题相关的面试题和知识点。"
             + "当用户询问特定技术领域的面试内容时，使用此工具获取相关知识。")
@@ -41,22 +47,33 @@ public class KnowledgeSearchTool {
     ) {
         log.info("Tool Calling - KnowledgeSearchTool: query={}, domain={}, topK={}", query, domain, topK);
 
+        String rewrittenQuery = queryRewriteService.rewriteIfNeeded(query);
+        if (!rewrittenQuery.equals(query)) {
+            log.info("Tool Calling - KnowledgeSearchTool Query Rewriting: '{}' → '{}'", query, rewrittenQuery);
+        }
+        String searchQuery = rewrittenQuery;
+
         try {
             // 向量检索阶段：Reranker 启用时扩大召回量
             int candidateCount = rerankerProperties.isEnabled()
                     ? rerankerProperties.getCandidateCount()
                     : (topK > 0 ? topK : CommonConstant.RAG_DEFAULT_TOP_K);
 
-            SearchRequest.Builder builder = SearchRequest.builder()
-                    .query(query)
-                    .topK(candidateCount)
-                    .similarityThreshold(CommonConstant.RAG_SIMILARITY_THRESHOLD);
+            List<Document> results;
+            if (hybridProperties.isEnabled()) {
+                results = hybridSearchService.hybridSearch(searchQuery, domain, candidateCount);
+            } else {
+                SearchRequest.Builder builder = SearchRequest.builder()
+                        .query(searchQuery)
+                        .topK(candidateCount)
+                        .similarityThreshold(CommonConstant.RAG_SIMILARITY_THRESHOLD);
 
-            if (domain != null && !domain.isEmpty()) {
-                builder.filterExpression("domain == '" + domain.toLowerCase() + "'");
+                if (domain != null && !domain.isEmpty()) {
+                    builder.filterExpression("domain == '" + domain.toLowerCase() + "'");
+                }
+
+                results = vectorStore.similaritySearch(builder.build());
             }
-
-            List<Document> results = vectorStore.similaritySearch(builder.build());
 
             if (results.isEmpty()) {
                 return "未找到相关的面试知识，请尝试其他关键词。";
