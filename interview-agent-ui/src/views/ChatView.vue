@@ -1,9 +1,9 @@
 <template>
   <div class="chat-view">
-    <div class="chat-toolbar">
+    <!-- Toolbar -->
+    <header class="chat-toolbar">
       <div class="toolbar-left">
         <el-select v-model="domain" placeholder="选择领域" style="width: 130px" size="default">
-          
           <el-option label="Java" value="java" />
           <el-option label="Python" value="python" />
           <el-option label="AI/机器学习" value="ai" />
@@ -16,122 +16,123 @@
           <el-option label="中级" value="中级" />
           <el-option label="高级" value="高级" />
         </el-select>
-        <div class="toolbar-divider"></div>
-        <div class="toolbar-switch">
-          <el-switch v-model="ragEnabled" active-text="知识库增强" inactive-text="" />
+        <span class="toolbar-sep"></span>
+        <label class="toolbar-toggle">
+          <el-switch v-model="ragEnabled" size="small" />
           <el-tooltip content="开启后，AI 会从知识库中检索相关文档来增强回答" placement="top">
-            <el-icon class="switch-help"><QuestionFilled /></el-icon>
+            <span class="toggle-label">知识库增强</span>
           </el-tooltip>
-        </div>
-        <div class="toolbar-switch">
-          <el-switch v-model="thinkingEnabled" active-text="深度思考" inactive-text="" :disabled="!supportsThinking" />
-          <el-tooltip v-if="!supportsThinking" content="当前模型不支持深度思考" placement="top">
-            <el-icon class="switch-help"><QuestionFilled /></el-icon>
+        </label>
+        <label class="toolbar-toggle">
+          <el-switch v-model="thinkingEnabled" size="small" :disabled="!supportsThinking" />
+          <el-tooltip :content="supportsThinking ? '模型将展示推理过程' : '当前模型不支持深度思考'" placement="top">
+            <span class="toggle-label" :class="{ disabled: !supportsThinking }">深度思考</span>
           </el-tooltip>
-        </div>
+        </label>
       </div>
-    </div>
+    </header>
 
-    <div class="chat-messages" ref="messagesContainer" @scroll="handleScroll">
-      <div v-if="messages.length === 0" class="empty-chat">
+    <!-- Messages -->
+    <main class="chat-messages" ref="messagesContainer" @scroll="handleScroll">
+      <!-- Welcome screen -->
+      <div v-if="messages.length === 0" class="welcome">
         <div class="welcome-icon">
-          <svg viewBox="0 0 120 120" width="80" height="80">
+          <svg viewBox="0 0 120 120" width="72" height="72">
             <defs>
-              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient id="welcomeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" style="stop-color:#409eff;stop-opacity:1" />
                 <stop offset="100%" style="stop-color:#67c23a;stop-opacity:1" />
               </linearGradient>
             </defs>
-            <circle cx="60" cy="60" r="56" fill="url(#grad1)" opacity="0.1" />
-            <circle cx="60" cy="60" r="44" fill="url(#grad1)" opacity="0.15" />
-            <path d="M40 50 Q60 35 80 50 Q80 75 60 85 Q40 75 40 50Z" fill="url(#grad1)" opacity="0.6" />
+            <circle cx="60" cy="60" r="56" fill="url(#welcomeGrad)" opacity="0.08" />
+            <circle cx="60" cy="60" r="42" fill="url(#welcomeGrad)" opacity="0.12" />
+            <path d="M40 50 Q60 35 80 50 Q80 75 60 85 Q40 75 40 50Z" fill="url(#welcomeGrad)" opacity="0.6" />
             <circle cx="52" cy="58" r="4" fill="white" />
             <circle cx="68" cy="58" r="4" fill="white" />
             <path d="M52 70 Q60 78 68 70" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" />
           </svg>
         </div>
-        <h2 class="welcome-title">面试智能助手</h2>
-        <p class="welcome-desc">基于 RAG 的智能面试辅导，为你生成面试题、解析知识点</p>
-        <div class="quick-actions">
-          <div class="quick-card" @click="sendQuickMessage('请生成3道Java基础面试题')">
-            <el-icon :size="20"><Document /></el-icon>
-            <span>Java 基础题</span>
-          </div>
-          <div class="quick-card" @click="sendQuickMessage('总结Java线程池的核心知识点')">
-            <el-icon :size="20"><Cpu /></el-icon>
-            <span>线程池知识点</span>
-          </div>
-          <div class="quick-card" @click="sendQuickMessage('HashMap的底层原理是什么？')">
-            <el-icon :size="20"><Key /></el-icon>
-            <span>HashMap 原理</span>
-          </div>
-          <div class="quick-card" @click="sendQuickMessage('Spring Boot自动装配的原理？')">
-            <el-icon :size="20"><SetUp /></el-icon>
-            <span>Spring Boot 原理</span>
-          </div>
+        <h1 class="welcome-title">面试智能助手</h1>
+        <p class="welcome-sub">基于 RAG 检索增强的智能面试辅导，支持知识库问答与面试题生成</p>
+        <div class="quick-grid">
+          <button class="quick-card" v-for="q in quickQuestions" :key="q.text" @click="sendQuickMessage(q.text)">
+            <span class="quick-icon">{{ q.icon }}</span>
+            <span class="quick-label">{{ q.label }}</span>
+          </button>
         </div>
       </div>
 
-      <div v-for="(msg, index) in messages" :key="index" :class="['message-item', msg.role]">
-        <div class="message-avatar">
-          <el-avatar v-if="msg.role === 'user'" :icon="UserFilled" :size="36" class="avatar-user" />
-          <el-avatar v-else :icon="Monitor" :size="36" class="avatar-ai" />
+      <!-- Message list -->
+      <div v-for="(msg, index) in messages" :key="index" :class="['msg', msg.role]">
+        <div class="msg-avatar">
+          <div v-if="msg.role === 'user'" class="avatar avatar-user">你</div>
+          <div v-else class="avatar avatar-ai">AI</div>
         </div>
-        <div class="message-content">
-          <div class="message-role">{{ msg.role === 'user' ? '你' : 'AI 助手' }}</div>
-          <div class="message-text" :ref="el => setMessageRef(el, index)" v-html="msg.renderedHtml"></div>
+        <div class="msg-body">
+          <div class="msg-role">{{ msg.role === 'user' ? '你' : 'AI 助手' }}</div>
+          <div
+            class="msg-bubble"
+            :class="{ 'bubble-ai': msg.role !== 'user', 'bubble-user': msg.role === 'user' }"
+            :ref="el => setMsgRef(el, index)"
+            v-html="msg.renderedHtml"
+          ></div>
         </div>
       </div>
 
-      <div v-if="loading" class="message-item assistant">
-        <div class="message-avatar"><el-avatar :icon="Monitor" :size="36" class="avatar-ai" /></div>
-        <div class="message-content">
-          <div class="message-role">AI 助手</div>
-          <div class="message-text typing-indicator">
-            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <!-- Typing indicator -->
+      <div v-if="loading && !streamHasContent" class="msg assistant">
+        <div class="msg-avatar"><div class="avatar avatar-ai">AI</div></div>
+        <div class="msg-body">
+          <div class="msg-role">AI 助手</div>
+          <div class="msg-bubble bubble-ai typing-bubble">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
           </div>
         </div>
       </div>
-    </div>
+    </main>
 
-    <div class="chat-input-wrapper">
-      <div class="chat-input">
-        <el-input
+    <!-- Input area -->
+    <footer class="chat-input-area">
+      <div class="input-row">
+        <textarea
+          ref="inputEl"
           v-model="inputMessage"
-          type="textarea"
-          :rows="2"
-          placeholder="输入你的问题，Ctrl+Enter 发送..."
-          @keydown.enter.ctrl="sendMessage"
+          class="input-textarea"
+          placeholder="输入你的问题..."
+          rows="1"
+          @input="autoResize"
+          @keydown.enter.ctrl.prevent="sendMessage"
+          @keydown.enter.meta.prevent="sendMessage"
           :disabled="loading"
-          resize="none"
-        />
-        <el-button
-          type="primary"
-          :icon="Promotion"
-          circle
-          size="large"
-          @click="sendMessage"
-          :loading="loading"
-          class="send-btn"
-        />
+        ></textarea>
+        <button class="send-btn" :class="{ active: canSend }" @click="sendMessage" :disabled="!canSend">
+          <svg v-if="!loading" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+          <span v-else class="send-loading"></span>
+        </button>
       </div>
-      <div class="input-hint">按 Ctrl+Enter 快速发送</div>
-    </div>
+      <div class="input-hint">Ctrl + Enter 发送</div>
+    </footer>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, inject, watch } from 'vue'
-import { UserFilled, Monitor, QuestionFilled, Promotion, Document, Cpu, Key, SetUp } from '@element-plus/icons-vue'
+import { ref, computed, nextTick, inject, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ElMessage } from 'element-plus'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
-import 'highlight.js/styles/github.css'
+import 'highlight.js/styles/github-dark.css'
 import request from '../utils/request'
 
+/* ── Markdown-it setup ── */
 const md = new MarkdownIt({
   html: false,
   linkify: true,
   typographer: true,
+  breaks: true,
   highlight(str, lang) {
     if (lang && hljs.getLanguage(lang)) {
       try {
@@ -142,71 +143,87 @@ const md = new MarkdownIt({
   }
 })
 
+/* ── State ── */
 const domain = ref('java')
 const difficulty = ref('中级')
 const ragEnabled = ref(false)
 const thinkingEnabled = ref(false)
 const inputMessage = ref('')
-const THINKING_MODELS = ['qwen3', 'qwen3.5', 'deepseek-r1', 'deepseek-v3.1']
-const currentModel = ref('qwen3.5:4b')
-const supportsThinking = ref(true)
-
-function checkThinkingSupport() {
-  const modelLower = currentModel.value.toLowerCase()
-  supportsThinking.value = THINKING_MODELS.some(m => modelLower.startsWith(m))
-  if (!supportsThinking.value) thinkingEnabled.value = false
-}
-checkThinkingSupport()
-
+const inputEl = ref(null)
 const messages = ref([])
 const loading = ref(false)
 const messagesContainer = ref(null)
 const currentSessionId = ref(null)
 const isUserAtBottom = ref(true)
+const msgRefs = ref({})
 
-const messageRefs = ref({})
+const THINKING_MODELS = ['qwen3', 'qwen3.5', 'deepseek-r1', 'deepseek-v3.1']
+const currentModel = ref('qwen3.5:4b')
+const supportsThinking = computed(() => THINKING_MODELS.some(m => currentModel.value.toLowerCase().startsWith(m)))
+if (!supportsThinking.value) thinkingEnabled.value = false
 
+const quickQuestions = [
+  { icon: '📝', label: 'Java 基础题', text: '请生成3道Java基础面试题' },
+  { icon: '🧵', label: '线程池知识点', text: '总结Java线程池的核心知识点' },
+  { icon: '🔑', label: 'HashMap 原理', text: 'HashMap的底层原理是什么？' },
+  { icon: '⚙️', label: 'Spring Boot 原理', text: 'Spring Boot自动装配的原理？' }
+]
+
+const streamHasContent = ref(false)
+
+const canSend = computed(() => {
+  const text = inputMessage.value.trim()
+  return text.length > 0 && !loading.value
+})
+
+/* ── Inject from parent ── */
 const activeSessionId = inject('activeSessionId', ref(null))
 const loadSessions = inject('loadSessions', async () => {})
-const setActiveSession = inject('setActiveSession', (id) => {})
+const setActiveSession = inject('setActiveSession', () => {})
 
 watch(activeSessionId, (newId) => {
   if (newId !== currentSessionId.value) {
     currentSessionId.value = newId
     if (newId) loadHistoryMessages(newId)
-    else { messages.value = []; messageRefs.value = {} }
+    else { messages.value = []; msgRefs.value = {} }
   }
 })
 
-function setMessageRef(el, index) {
-  if (el) messageRefs.value[index] = el
-  else delete messageRefs.value[index]
+/* ── Refs & event delegation ── */
+function setMsgRef(el, index) {
+  if (el) msgRefs.value[index] = el
+  else delete msgRefs.value[index]
 }
 
-function renderToHtml(text, streaming = false) {
-  if (!text) return ''
-  let cleaned = text.replace(/<think[\s\S]*?<\/think>/g, '').trim()
-  if (streaming && cleaned) {
-    const codeBlocks = (cleaned.match(/```/g) || []).length
-    if (codeBlocks % 2 !== 0) cleaned += '\n```'
-  }
-  return md.render(cleaned)
-}
-
-function updateMessageContent(msgIndex, content, streaming) {
-  const msg = messages.value[msgIndex]
-  const renderedHtml = renderToHtml(content, streaming)
-  messages.value[msgIndex] = { ...msg, content, streaming, renderedHtml }
-  nextTick(() => {
-    const el = messageRefs.value[msgIndex]
-    if (el && el.innerHTML !== renderedHtml) el.innerHTML = renderedHtml
+function setupCopyDelegation() {
+  if (!messagesContainer.value) return
+  messagesContainer.value.addEventListener('click', (e) => {
+    const btn = e.target.closest('.code-copy-btn')
+    if (!btn) return
+    const code = btn.getAttribute('data-code')
+    if (!code) return
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = '已复制'
+      setTimeout(() => { btn.textContent = '复制' }, 1500)
+    }).catch(() => {})
   })
+}
+
+onMounted(() => { setupCopyDelegation() })
+
+/* ── Utilities ── */
+function autoResize() {
+  const el = inputEl.value
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px'
 }
 
 function scrollToBottom(force = false) {
   nextTick(() => {
-    if (messagesContainer.value && (force || isUserAtBottom.value)) {
-      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+    const el = messagesContainer.value
+    if (el && (force || isUserAtBottom.value)) {
+      el.scrollTop = el.scrollHeight
     }
   })
 }
@@ -222,17 +239,51 @@ function sendQuickMessage(text) {
   sendMessage()
 }
 
+/* ── Markdown rendering ── */
+function renderToHtml(text, streaming = false) {
+  if (!text) return ''
+  // Strip <think> blocks
+  let cleaned = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim()
+  if (!cleaned) return ''
+
+  if (streaming) {
+    // Auto-close unfinished fenced code blocks
+    const fenceCount = (cleaned.match(/```/g) || []).length
+    if (fenceCount % 2 !== 0) cleaned += '\n```'
+    // Strip incomplete HTML tags at the end
+    cleaned = cleaned.replace(/<(strong|em|b|i|del|code|a)[^>]*$/, '')
+  }
+
+  return md.render(cleaned)
+}
+
+function postProcessCodeBlocks(html) {
+  return html.replace(/<pre class="hljs"><code>([\s\S]*?)<\/code><\/pre>/g, (_, codeContent) => {
+    return `<div class="code-block-wrapper"><div class="code-block-tools"><span class="code-lang-label"></span><button class="code-copy-btn" data-code="${encodeURIComponent(codeContent.replace(/<[^>]+>/g, ''))}">复制</button></div><pre class="hljs"><code>${codeContent}</code></pre></div>`
+  })
+}
+
+function updateMsg(idx, content, streaming) {
+  const msg = messages.value[idx]
+  const rawHtml = renderToHtml(content, streaming)
+  const renderedHtml = postProcessCodeBlocks(rawHtml)
+  messages.value[idx] = { ...msg, content, streaming, renderedHtml }
+  nextTick(() => {
+    const el = msgRefs.value[idx]
+    if (el && el.innerHTML !== renderedHtml) el.innerHTML = renderedHtml
+  })
+}
+
+/* ── History loading ── */
 async function loadHistoryMessages(sessionId) {
   try {
     const res = await request.get(`/chat/sessions/${sessionId}/messages`)
-    const historyList = res.data || []
-    messages.value = historyList.map(msg => ({
-      role: msg.role,
-      content: msg.content,
-      streaming: false,
-      renderedHtml: renderToHtml(msg.content, false)
-    }))
-    messageRefs.value = {}
+    const list = res.data || []
+    messages.value = list.map(msg => {
+      const rawHtml = renderToHtml(msg.content, false)
+      return { role: msg.role, content: msg.content, streaming: false, renderedHtml: postProcessCodeBlocks(rawHtml) }
+    })
+    msgRefs.value = {}
     scrollToBottom(true)
   } catch (e) {
     console.error('加载历史消息失败', e)
@@ -240,28 +291,36 @@ async function loadHistoryMessages(sessionId) {
   }
 }
 
+/* ── Send message ── */
 async function sendMessage() {
   const text = inputMessage.value.trim()
   if (!text || loading.value) return
 
-  messages.value.push({ role: 'user', content: text, streaming: false, renderedHtml: renderToHtml(text, false) })
+  messages.value.push({ role: 'user', content: text, streaming: false, renderedHtml: postProcessCodeBlocks(renderToHtml(text, false)) })
   inputMessage.value = ''
   loading.value = true
+  streamHasContent.value = false
   isUserAtBottom.value = true
-  scrollToBottom(true)
+  nextTick(() => { autoResize(); scrollToBottom(true) })
 
   try {
     await streamChat(text)
+    // 流式结束后，从服务器重新加载消息，确保 Markdown 完整渲染
+    if (currentSessionId.value) {
+      await loadHistoryMessages(currentSessionId.value)
+    }
     await loadSessions()
   } catch (e) {
     console.error('对话错误', e)
-    messages.value.push({ role: 'assistant', content: '抱歉，生成回答时出现错误，请稍后重试。', streaming: false, renderedHtml: renderToHtml('抱歉，生成回答时出现错误，请稍后重试。', false) })
+    const errMsg = '抱歉，生成回答时出现错误，请稍后重试。'
+    messages.value.push({ role: 'assistant', content: errMsg, streaming: false, renderedHtml: `<p>${errMsg}</p>` })
   } finally {
     loading.value = false
     scrollToBottom(true)
   }
 }
 
+/* ── SSE streaming ── */
 function extractSSEDatas(buffer) {
   let content = ''
   let remainingBuffer = ''
@@ -269,17 +328,27 @@ function extractSSEDatas(buffer) {
   const endsWithNewline = buffer.endsWith('\n')
   const limit = endsWithNewline ? lines.length : lines.length - 1
 
+  let dataLineCount = 0
+
   for (let i = 0; i < limit; i++) {
     const line = lines[i]
-    if (line === '' || line.startsWith(':')) continue
+
+    if (line === '') {
+      // Event boundary: join collected data lines with \n
+      if (dataLineCount > 1) content += '\n'
+      dataLineCount = 0
+      continue
+    }
+    if (line.startsWith(':')) continue
     if (!line.startsWith('data:')) continue
 
-    const data = line.slice(5)
-    const trimmed = data.trim()
-    if (!trimmed || trimmed === '[DONE]') continue
-    if (trimmed.startsWith('{') && trimmed.includes('sessionId')) {
+    const data = line.slice(5).trim()
+    if (!data || data === '[DONE]') continue
+
+    // Session ID control message
+    if (data.startsWith('{') && data.includes('sessionId')) {
       try {
-        const parsed = JSON.parse(trimmed)
+        const parsed = JSON.parse(data)
         if (parsed.sessionId && !currentSessionId.value) {
           currentSessionId.value = parsed.sessionId
           setActiveSession(parsed.sessionId)
@@ -288,9 +357,14 @@ function extractSSEDatas(buffer) {
       continue
     }
 
-    if (trimmed) content += trimmed
-    else content += '\n'
+    // Content data
+    if (dataLineCount > 0) content += '\n'
+    content += data
+    dataLineCount++
   }
+
+  // Handle last data line at event boundary if buffer ends with newline
+  if (endsWithNewline && dataLineCount > 1) content += '\n'
 
   if (!endsWithNewline) remainingBuffer = lines[lines.length - 1]
   return { content, remainingBuffer }
@@ -312,28 +386,25 @@ async function readSSEStream(response, msgIndex) {
 
     if (content) {
       assistantContent += content
-      updateMessageContent(msgIndex, assistantContent, true)
+      streamHasContent.value = true
+      updateMsg(msgIndex, assistantContent, true)
       scrollToBottom()
     }
   }
 
+  // Flush remaining buffer
   buffer += decoder.decode(new Uint8Array(0), { stream: false })
-  if (buffer) {
-    const finalParts = []
+  if (buffer.trim()) {
     for (const line of buffer.split('\n')) {
       if (!line.startsWith('data:')) continue
       const data = line.slice(5).trim()
       if (!data || data === '[DONE]') continue
       if (data.startsWith('{') && data.includes('sessionId')) continue
-      finalParts.push(data)
-    }
-    const finalContent = finalParts.join('\n')
-    if (finalContent) {
-      assistantContent += finalContent
+      assistantContent += data
     }
   }
 
-  updateMessageContent(msgIndex, assistantContent, false)
+  updateMsg(msgIndex, assistantContent, false)
   return assistantContent
 }
 
@@ -346,8 +417,8 @@ async function streamChat(text) {
   })
   if (currentSessionId.value) params.append('sessionId', currentSessionId.value)
 
-  const baseUrl = ragEnabled.value ? '/api/rag/chat/stream' : '/api/chat/stream'
-  const response = await fetch(`${baseUrl}?${params.toString()}`)
+  const url = ragEnabled.value ? '/api/rag/chat/stream' : '/api/chat/stream'
+  const response = await fetch(`${url}?${params.toString()}`)
   if (!response.ok) throw new Error('请求失败')
 
   messages.value.push({ role: 'assistant', content: '', streaming: false, renderedHtml: '' })
@@ -356,71 +427,81 @@ async function streamChat(text) {
 </script>
 
 <style scoped>
+/* ── Layout ── */
 .chat-view {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f0f2f5;
+  background: #f5f6fa;
 }
 
+/* ── Toolbar ── */
 .chat-toolbar {
   display: flex;
   align-items: center;
   padding: 10px 24px;
   background: #fff;
-  border-bottom: 1px solid #e8ecf0;
-  box-shadow: 0 1px 6px rgba(0,0,0,.04);
+  border-bottom: 1px solid #ebedf0;
+  flex-shrink: 0;
 }
 
 .toolbar-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.toolbar-divider {
+.toolbar-sep {
   width: 1px;
-  height: 24px;
-  background: #e0e0e0;
-  margin: 0 6px;
+  height: 20px;
+  background: #e0e3e8;
 }
 
-.toolbar-switch {
+.toolbar-toggle {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
 }
 
-.switch-help {
-  color: #909399;
-  cursor: help;
-  font-size: 14px;
+.toggle-label {
+  font-size: 13px;
+  color: #606266;
+  transition: color .2s;
 }
 
+.toggle-label.disabled {
+  color: #c0c4cc;
+  cursor: not-allowed;
+}
+
+/* ── Messages area ── */
 .chat-messages {
   flex: 1;
   overflow-y: auto;
   padding: 24px 0;
-  scroll-behavior: smooth;
 }
 
-.empty-chat {
+/* ── Welcome screen ── */
+.welcome {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 40px;
+  padding: 40px 24px;
 }
 
 .welcome-icon {
-  margin-bottom: 20px;
-  animation: floatUp 3s ease-in-out infinite;
+  margin-bottom: 16px;
+  animation: welcomeFloat 3s ease-in-out infinite;
 }
 
-@keyframes floatUp {
+@keyframes welcomeFloat {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-6px); }
 }
 
 .welcome-title {
@@ -432,17 +513,17 @@ async function streamChat(text) {
   margin-bottom: 8px;
 }
 
-.welcome-desc {
+.welcome-sub {
   color: #909399;
-  font-size: 15px;
-  margin-bottom: 32px;
+  font-size: 14px;
+  margin-bottom: 36px;
 }
 
-.quick-actions {
+.quick-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  max-width: 460px;
+  max-width: 440px;
   width: 100%;
 }
 
@@ -450,260 +531,414 @@ async function streamChat(text) {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 18px;
+  padding: 14px 16px;
   background: #fff;
-  border: 1px solid #e8ecf0;
+  border: 1px solid #ebedf0;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all .25s ease;
   font-size: 14px;
-  color: #606266;
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  color: #4e5969;
+  text-align: left;
 }
 
 .quick-card:hover {
   border-color: #409eff;
   color: #409eff;
-  box-shadow: 0 4px 12px rgba(64,158,255,.12);
+  box-shadow: 0 4px 14px rgba(64, 158, 255, .1);
   transform: translateY(-2px);
 }
 
-.quick-card .el-icon {
-  color: #409eff;
+.quick-icon {
+  font-size: 18px;
   flex-shrink: 0;
+  width: 28px;
+  text-align: center;
 }
 
-.message-item {
+.quick-label {
+  font-weight: 500;
+}
+
+/* ── Messages ── */
+.msg {
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
-  padding: 0 24px;
-  animation: msgFadeIn .35s ease;
+  padding: 0 24px 20px;
+  animation: msgIn .3s ease;
 }
 
-.message-item.user {
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg.user {
   flex-direction: row-reverse;
 }
 
-.message-avatar {
+.msg-avatar {
   flex-shrink: 0;
-  margin-top: 2px;
+  padding-top: 22px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
 }
 
 .avatar-user {
-  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  background: linear-gradient(135deg, #667eea, #764ba2);
 }
 
 .avatar-ai {
-  background: linear-gradient(135deg, #409eff, #67c23a) !important;
+  background: linear-gradient(135deg, #409eff, #36d399);
 }
 
-.message-content {
-  max-width: 72%;
+.msg-body {
+  max-width: 76%;
   min-width: 0;
 }
 
-.message-role {
+.msg-role {
   font-size: 12px;
   color: #909399;
   margin-bottom: 6px;
   font-weight: 500;
+  padding: 0 2px;
 }
 
-.message-item.user .message-role {
+.msg.user .msg-role {
   text-align: right;
 }
 
-.message-text {
-  background: #fff;
+/* ── Message bubbles ── */
+.msg-bubble {
   padding: 14px 18px;
-  border-radius: 16px;
-  border-top-left-radius: 4px;
+  border-radius: 14px;
   font-size: 14px;
   line-height: 1.75;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
-.message-item.user .message-text {
+.bubble-ai {
+  background: #fff;
+  border: 1px solid #ebedf0;
+  border-top-left-radius: 4px;
+  color: #303133;
+}
+
+.bubble-user {
   background: linear-gradient(135deg, #409eff, #5b8def);
   color: #fff;
-  border-top-left-radius: 16px;
   border-top-right-radius: 4px;
 }
 
-.message-item.user .message-text :deep(pre),
-.message-item.user .message-text :deep(code) {
-  background: rgba(255,255,255,.15);
+/* ── Typing indicator ── */
+.typing-bubble {
+  display: flex;
+  gap: 6px;
+  padding: 16px 20px;
+  align-items: center;
 }
 
-.message-text :deep(pre) {
-  background: #1e1e2e;
-  padding: 16px;
-  border-radius: 10px;
-  overflow-x: auto;
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  background: #409eff;
+  border-radius: 50%;
+  animation: typingPulse 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) { animation-delay: .2s; }
+.typing-dot:nth-child(3) { animation-delay: .4s; }
+
+@keyframes typingPulse {
+  0%, 80%, 100% { transform: scale(.5); opacity: .3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Markdown content styles (inside bubbles) ── */
+.msg-bubble :deep(p) {
+  margin: 6px 0;
+}
+
+.msg-bubble :deep(strong) {
+  color: #1d2129;
+  font-weight: 600;
+}
+
+.bubble-user :deep(strong) {
+  color: #fff;
+}
+
+.msg-bubble :deep(h1),
+.msg-bubble :deep(h2),
+.msg-bubble :deep(h3) {
+  margin: 16px 0 8px;
+  color: #1d2129;
+  font-weight: 600;
+}
+
+.msg-bubble :deep(h1) { font-size: 18px; }
+.msg-bubble :deep(h2) { font-size: 16px; }
+.msg-bubble :deep(h3) { font-size: 15px; }
+
+.msg-bubble :deep(ul),
+.msg-bubble :deep(ol) {
+  padding-left: 22px;
+  margin: 6px 0;
+}
+
+.msg-bubble :deep(li) {
+  margin: 4px 0;
+  line-height: 1.7;
+}
+
+.msg-bubble :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
   margin: 10px 0;
-  position: relative;
-}
-
-.message-text :deep(pre.hljs) {
-  background: #1e1e2e;
-  padding: 16px;
-  border-radius: 10px;
-}
-
-.message-text :deep(pre code) {
-  font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
   font-size: 13px;
-  color: #cdd6f4;
-  line-height: 1.6;
 }
 
-.message-text :deep(code) {
+.msg-bubble :deep(th),
+.msg-bubble :deep(td) {
+  border: 1px solid #e5e6eb;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.msg-bubble :deep(th) {
+  background: #f7f8fa;
+  font-weight: 600;
+  color: #1d2129;
+}
+
+.msg-bubble :deep(blockquote) {
+  border-left: 3px solid #409eff;
+  padding: 8px 14px;
+  margin: 8px 0;
+  background: #f0f6ff;
+  color: #4e5969;
+  border-radius: 0 6px 6px 0;
+}
+
+.msg-bubble :deep(hr) {
+  border: none;
+  border-top: 1px solid #e5e6eb;
+  margin: 12px 0;
+}
+
+.msg-bubble :deep(img) {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+/* Inline code */
+.msg-bubble :deep(code) {
   font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
   font-size: 13px;
   background: #f0f2f5;
   padding: 2px 6px;
   border-radius: 4px;
-  color: #e74c3c;
+  color: #c7254e;
 }
 
-.message-text :deep(h1),
-.message-text :deep(h2),
-.message-text :deep(h3) {
-  margin: 14px 0 8px;
-  color: #303133;
+.bubble-user :deep(code) {
+  background: rgba(255, 255, 255, .18);
+  color: #fff;
 }
 
-.message-text :deep(h1) { font-size: 18px; }
-.message-text :deep(h2) { font-size: 16px; }
-.message-text :deep(h3) { font-size: 15px; }
-
-.message-text :deep(ul),
-.message-text :deep(ol) {
-  padding-left: 22px;
-  margin: 6px 0;
-}
-
-.message-text :deep(li) {
-  margin: 4px 0;
-  line-height: 1.7;
-}
-
-.message-text :deep(p) {
-  margin: 6px 0;
-}
-
-.message-text :deep(table) {
-  border-collapse: collapse;
-  width: 100%;
+/* Code block wrapper */
+.msg-bubble :deep(.code-block-wrapper) {
+  position: relative;
   margin: 10px 0;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
 }
 
-.message-text :deep(th),
-.message-text :deep(td) {
-  border: 1px solid #e8ecf0;
-  padding: 10px 14px;
-  text-align: left;
-  font-size: 13px;
-}
-
-.message-text :deep(th) {
-  background: #f5f7fa;
-  font-weight: 600;
-}
-
-.message-text :deep(blockquote) {
-  border-left: 4px solid #409eff;
-  padding: 10px 16px;
-  margin: 10px 0;
-  background: #f0f7ff;
-  color: #606266;
-  border-radius: 0 8px 8px 0;
-}
-
-.message-text :deep(strong) {
-  color: #303133;
-  font-weight: 600;
-}
-
-.typing-indicator {
+.msg-bubble :deep(.code-block-tools) {
   display: flex;
-  gap: 5px;
-  padding: 18px;
   align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: #282a36;
+  border-bottom: 1px solid #383a4e;
 }
 
-.typing-indicator .dot {
-  width: 8px;
-  height: 8px;
-  background: #409eff;
-  border-radius: 50%;
-  animation: typingBounce 1.4s infinite ease-in-out;
+.msg-bubble :deep(.code-lang-label) {
+  font-size: 11px;
+  color: #7a7f8e;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .5px;
 }
 
-.typing-indicator .dot:nth-child(2) { animation-delay: .2s; }
-.typing-indicator .dot:nth-child(3) { animation-delay: .4s; }
-
-@keyframes typingBounce {
-  0%, 80%, 100% { transform: scale(.5); opacity: .4; }
-  40% { transform: scale(1); opacity: 1; }
+.msg-bubble :deep(.code-copy-btn) {
+  font-size: 11px;
+  color: #7a7f8e;
+  background: none;
+  border: 1px solid #383a4e;
+  border-radius: 4px;
+  padding: 2px 10px;
+  cursor: pointer;
+  transition: all .2s;
+  line-height: 1.5;
 }
 
-@keyframes msgFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.msg-bubble :deep(.code-copy-btn:hover) {
+  color: #cdd0d8;
+  border-color: #5a5e72;
 }
 
-.chat-input-wrapper {
+.msg-bubble :deep(.code-block-wrapper > pre) {
+  margin: 0;
+  border-radius: 0;
+  padding: 14px 16px;
+  background: #282a36;
+}
+
+.msg-bubble :deep(.code-block-wrapper > pre code) {
+  font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #f8f8f2;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* ── Input area ── */
+.chat-input-area {
   background: #fff;
-  border-top: 1px solid #e8ecf0;
-  padding: 16px 24px 12px;
-  box-shadow: 0 -2px 8px rgba(0,0,0,.03);
+  border-top: 1px solid #ebedf0;
+  padding: 14px 24px 10px;
+  flex-shrink: 0;
 }
 
-.chat-input {
+.input-row {
   display: flex;
   align-items: flex-end;
-  gap: 12px;
+  gap: 10px;
   max-width: 860px;
   margin: 0 auto;
 }
 
-.chat-input :deep(.el-textarea__inner) {
+.input-textarea {
+  flex: 1;
   resize: none;
+  border: 1px solid #dcdfe6;
   border-radius: 12px;
-  padding: 12px 16px;
+  padding: 10px 14px;
   font-size: 14px;
+  font-family: inherit;
   line-height: 1.6;
-  border: 1px solid #e0e0e0;
-  transition: border-color .2s;
+  color: #303133;
+  background: #fff;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  min-height: 40px;
+  max-height: 120px;
 }
 
-.chat-input :deep(.el-textarea__inner):focus {
+.input-textarea:focus {
   border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64,158,255,.1);
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, .1);
+}
+
+.input-textarea:disabled {
+  background: #f5f7fa;
+  cursor: not-allowed;
+}
+
+.input-textarea::placeholder {
+  color: #c0c4cc;
 }
 
 .send-btn {
   flex-shrink: 0;
-  width: 44px !important;
-  height: 44px !important;
-  border-radius: 12px !important;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  background: #dcdfe6;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all .2s;
 }
 
-.send-btn:hover {
+.send-btn.active {
+  background: linear-gradient(135deg, #409eff, #5b8def);
+  box-shadow: 0 2px 8px rgba(64, 158, 255, .25);
+}
+
+.send-btn.active:hover {
   transform: scale(1.05);
+  box-shadow: 0 4px 14px rgba(64, 158, 255, .35);
+}
+
+.send-btn:disabled {
+  cursor: not-allowed;
+  transform: none;
+}
+
+.send-loading {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, .3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .input-hint {
   text-align: center;
-  font-size: 12px;
+  font-size: 11px;
   color: #c0c4cc;
   margin-top: 6px;
+}
+
+/* ── Scrollbar ── */
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #dcdfe6;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #c0c4cc;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .chat-toolbar { padding: 8px 14px; }
+  .toolbar-left { gap: 8px; }
+  .msg { padding: 0 14px 16px; }
+  .msg-body { max-width: 85%; }
+  .chat-input-area { padding: 10px 14px 8px; }
+  .quick-grid { grid-template-columns: 1fr; max-width: 280px; }
 }
 </style>

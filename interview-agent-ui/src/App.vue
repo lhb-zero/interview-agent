@@ -1,18 +1,19 @@
 <template>
   <el-container class="app-container">
-    <el-aside width="260px" class="app-aside">
-      <div class="logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 32 32" width="28" height="28">
+    <el-aside width="260px" class="sidebar">
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 32 32" width="26" height="26">
             <defs>
-              <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient id="lgLogo" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" style="stop-color:#409eff" />
                 <stop offset="100%" style="stop-color:#67c23a" />
               </linearGradient>
             </defs>
-            <circle cx="16" cy="16" r="14" fill="url(#logoGrad)" opacity="0.2" />
-            <circle cx="16" cy="16" r="10" fill="url(#logoGrad)" opacity="0.4" />
-            <path d="M11 14 Q16 10 21 14 Q21 20 16 23 Q11 20 11 14Z" fill="url(#logoGrad)" />
+            <circle cx="16" cy="16" r="14" fill="url(#lgLogo)" opacity="0.2" />
+            <circle cx="16" cy="16" r="10" fill="url(#lgLogo)" opacity="0.4" />
+            <path d="M11 14 Q16 10 21 14 Q21 20 16 23 Q11 20 11 14Z" fill="url(#lgLogo)" />
             <circle cx="14" cy="16" r="1.5" fill="white" />
             <circle cx="18" cy="16" r="1.5" fill="white" />
             <path d="M14 19 Q16 21 18 19" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round" />
@@ -21,31 +22,32 @@
         <span class="logo-text">面试智能助手</span>
       </div>
 
-      <el-menu
-        :default-active="currentRoute"
-        class="aside-menu"
-        @select="handleMenuSelect"
-      >
-        <el-menu-item index="/">
-          <el-icon><ChatDotRound /></el-icon>
-          <span>智能对话</span>
-        </el-menu-item>
-        <el-menu-item index="/knowledge">
-          <el-icon><Folder /></el-icon>
-          <span>知识库管理</span>
-        </el-menu-item>
-      </el-menu>
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <el-menu :default-active="currentRoute" class="nav-menu" @select="handleMenuSelect">
+          <el-menu-item index="/">
+            <el-icon><ChatDotRound /></el-icon>
+            <span>智能对话</span>
+          </el-menu-item>
+          <el-menu-item index="/knowledge">
+            <el-icon><Folder /></el-icon>
+            <span>知识库管理</span>
+          </el-menu-item>
+        </el-menu>
+      </nav>
 
-      <div class="new-chat-btn-wrapper" v-if="currentRoute === '/'">
+      <!-- New chat button -->
+      <div class="sidebar-new-chat" v-if="currentRoute === '/'">
         <el-button type="primary" class="new-chat-btn" @click="createNewChat">
           <el-icon><Plus /></el-icon>
           <span>新增对话</span>
         </el-button>
       </div>
 
-      <div class="session-section" v-if="currentRoute === '/'">
+      <!-- Session list -->
+      <div class="sidebar-sessions" v-if="currentRoute === '/'">
         <template v-for="group in groupedSessions" :key="group.label">
-          <div class="session-group-label">{{ group.label }}</div>
+          <div class="group-label">{{ group.label }}</div>
           <div class="session-list">
             <div
               v-for="session in group.sessions"
@@ -70,20 +72,21 @@
                 ref="renameInput"
               />
               <div class="session-actions" v-if="hoveredSessionId === session.sessionId && editingSessionId !== session.sessionId">
-                <el-button class="action-btn" size="small" text @click.stop="startRename(session)">
-                  <el-icon><Edit /></el-icon>
-                </el-button>
-                <el-button class="action-btn delete" size="small" text @click.stop="deleteSession(session)">
-                  <el-icon><Delete /></el-icon>
-                </el-button>
+                <button class="action-btn" @click.stop="startRename(session)" title="重命名">
+                  <el-icon :size="13"><Edit /></el-icon>
+                </button>
+                <button class="action-btn action-del" @click.stop="deleteSession(session)" title="删除">
+                  <el-icon :size="13"><Delete /></el-icon>
+                </button>
               </div>
             </div>
           </div>
         </template>
       </div>
 
-      <div class="aside-footer">
-        <div class="footer-info">Powered by Spring AI + RAG</div>
+      <!-- Footer -->
+      <div class="sidebar-footer">
+        <span>Powered by Spring AI + RAG</span>
       </div>
     </el-aside>
 
@@ -116,9 +119,7 @@ provide('sessions', sessions)
 provide('loadSessions', loadSessions)
 provide('setActiveSession', (id) => { activeSessionId.value = id })
 
-onMounted(() => {
-  loadSessions()
-})
+onMounted(() => { loadSessions() })
 
 function handleMenuSelect(index) {
   router.push(index)
@@ -128,9 +129,7 @@ async function loadSessions() {
   try {
     const res = await request.get('/chat/sessions')
     sessions.value = res.data || []
-  } catch (e) {
-    // ignore
-  }
+  } catch (e) { /* ignore */ }
 }
 
 function createNewChat() {
@@ -143,8 +142,7 @@ function selectSession(session) {
 }
 
 function getSessionTitle(session) {
-  if (session.title) return session.title
-  return session.domain || '新对话'
+  return session.title || session.domain || '新对话'
 }
 
 const groupedSessions = computed(() => {
@@ -162,19 +160,11 @@ const groupedSessions = computed(() => {
 
   for (const session of sessions.value) {
     const dt = session.createdAt ? new Date(session.createdAt) : null
-    if (!dt) {
-      groups.older.sessions.push(session)
-      continue
-    }
-    if (dt >= today) {
-      groups.today.sessions.push(session)
-    } else if (dt >= sevenDaysAgo) {
-      groups.week.sessions.push(session)
-    } else if (dt >= thirtyDaysAgo) {
-      groups.month.sessions.push(session)
-    } else {
-      groups.older.sessions.push(session)
-    }
+    if (!dt) { groups.older.sessions.push(session); continue }
+    if (dt >= today) groups.today.sessions.push(session)
+    else if (dt >= sevenDaysAgo) groups.week.sessions.push(session)
+    else if (dt >= thirtyDaysAgo) groups.month.sessions.push(session)
+    else groups.older.sessions.push(session)
   }
 
   return [groups.today, groups.week, groups.month, groups.older].filter(g => g.sessions.length > 0)
@@ -187,31 +177,19 @@ function startRename(session) {
     if (renameInput.value) {
       const inputs = Array.isArray(renameInput.value) ? renameInput.value : [renameInput.value]
       const el = inputs[0]
-      if (el) {
-        el.focus()
-        el.select()
-      }
+      if (el) { el.focus(); el.select() }
     }
   })
 }
 
 async function confirmRename(session) {
   const newTitle = renameValue.value.trim()
-  if (!newTitle) {
-    cancelRename()
-    return
-  }
-  if (newTitle === getSessionTitle(session)) {
-    cancelRename()
-    return
-  }
+  if (!newTitle || newTitle === getSessionTitle(session)) { cancelRename(); return }
   try {
     await request.put(`/chat/sessions/${session.sessionId}/rename`, { title: newTitle })
     session.title = newTitle
     ElMessage.success('重命名成功')
-  } catch (e) {
-    ElMessage.error('重命名失败')
-  }
+  } catch (e) { ElMessage.error('重命名失败') }
   editingSessionId.value = null
   renameValue.value = ''
 }
@@ -229,37 +207,28 @@ async function deleteSession(session) {
       type: 'warning'
     })
     await request.delete(`/chat/sessions/${session.sessionId}`)
-    if (activeSessionId.value === session.sessionId) {
-      activeSessionId.value = null
-    }
+    if (activeSessionId.value === session.sessionId) activeSessionId.value = null
     await loadSessions()
     ElMessage.success('删除成功')
   } catch (e) {
-    if (e !== 'cancel') {
-      ElMessage.error('删除失败')
-    }
+    if (e !== 'cancel') ElMessage.error('删除失败')
   }
 }
 </script>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body, #app {
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-.app-container {
-  height: 100vh;
-}
+.app-container { height: 100vh; }
 
-.app-aside {
-  background: linear-gradient(180deg, #1a1b2e 0%, #16172b 100%);
+/* ── Sidebar ── */
+.sidebar {
+  background: linear-gradient(180deg, #1a1b2e 0%, #151627 100%);
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -267,15 +236,14 @@ html, body, #app {
   overflow: hidden;
 }
 
-.logo {
+.sidebar-logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 20px 16px;
-  margin-bottom: 4px;
+  padding: 20px 16px 12px;
 }
 
-.logo-icon {
+.logo-mark {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -283,49 +251,55 @@ html, body, #app {
 }
 
 .logo-text {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   background: linear-gradient(135deg, #409eff, #67c23a);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: 0.5px;
+  letter-spacing: .3px;
 }
 
-.aside-menu {
-  border-right: none;
-  background: transparent;
+/* ── Navigation ── */
+.sidebar-nav {
   padding: 0 8px;
 }
 
-.aside-menu .el-menu-item {
-  color: #a0a4b8;
-  border-radius: 10px;
+.nav-menu {
+  border-right: none;
+  background: transparent;
+}
+
+.nav-menu .el-menu-item {
+  color: #8b8fa3;
+  border-radius: 8px;
   margin-bottom: 2px;
-  height: 44px;
-  line-height: 44px;
+  height: 40px;
+  line-height: 40px;
   transition: all .2s;
+  font-size: 13px;
 }
 
-.aside-menu .el-menu-item:hover {
-  background: rgba(64, 158, 255, 0.08);
-  color: #c0c4cc;
+.nav-menu .el-menu-item:hover {
+  background: rgba(255, 255, 255, .06);
+  color: #b0b4c8;
 }
 
-.aside-menu .el-menu-item.is-active {
-  background: rgba(64, 158, 255, 0.15);
+.nav-menu .el-menu-item.is-active {
+  background: rgba(64, 158, 255, .12);
   color: #409eff;
 }
 
-.new-chat-btn-wrapper {
-  padding: 8px 12px;
+/* ── New chat ── */
+.sidebar-new-chat {
+  padding: 8px 12px 4px;
 }
 
 .new-chat-btn {
   width: 100%;
-  border-radius: 10px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 500;
-  height: 40px;
+  height: 38px;
   background: linear-gradient(135deg, #409eff, #5b8def);
   border: none;
   transition: all .2s;
@@ -333,70 +307,62 @@ html, body, #app {
 
 .new-chat-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(64,158,255,.3);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, .3);
 }
 
-.session-section {
+/* ── Sessions ── */
+.sidebar-sessions {
   flex: 1;
   padding: 0 12px 12px;
   overflow-y: auto;
 }
 
-.session-section::-webkit-scrollbar {
-  width: 4px;
-}
+.sidebar-sessions::-webkit-scrollbar { width: 4px; }
+.sidebar-sessions::-webkit-scrollbar-track { background: transparent; }
+.sidebar-sessions::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .08); border-radius: 2px; }
 
-.session-section::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.session-section::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,.1);
-  border-radius: 2px;
-}
-
-.session-group-label {
-  padding: 10px 10px 6px;
-  color: #5a5e72;
+.group-label {
+  padding: 10px 8px 5px;
+  color: #4a4e62;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: .8px;
 }
 
 .session-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .session-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 10px;
-  border-radius: 10px;
+  padding: 9px 8px;
+  border-radius: 8px;
   cursor: pointer;
-  color: #a0a4b8;
+  color: #8b8fa3;
   font-size: 13px;
-  transition: all .2s;
+  transition: all .15s;
   position: relative;
 }
 
 .session-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #d0d4e0;
+  background: rgba(255, 255, 255, .05);
+  color: #c0c4d8;
 }
 
 .session-item.active {
-  background: rgba(64, 158, 255, 0.12);
+  background: rgba(64, 158, 255, .1);
   color: #409eff;
 }
 
 .session-icon {
   font-size: 14px;
   flex-shrink: 0;
-  opacity: 0.7;
+  opacity: .6;
 }
 
 .session-name {
@@ -409,59 +375,61 @@ html, body, #app {
 
 .session-rename-input {
   flex: 1;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, .08);
   border: 1px solid #409eff;
-  border-radius: 6px;
+  border-radius: 5px;
   color: #fff;
-  padding: 3px 8px;
+  padding: 2px 7px;
   font-size: 13px;
   outline: none;
 }
 
 .session-actions {
   display: flex;
-  gap: 0;
+  gap: 2px;
   flex-shrink: 0;
   opacity: 0;
-  transition: opacity .15s;
+  transition: opacity .12s;
 }
 
-.session-item:hover .session-actions {
-  opacity: 1;
-}
+.session-item:hover .session-actions { opacity: 1; }
 
 .action-btn {
-  color: #6b7280 !important;
-  padding: 4px !important;
-  border-radius: 6px !important;
-  min-width: 28px !important;
-  height: 28px !important;
+  background: none;
+  border: none;
+  color: #6b7280;
+  padding: 4px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
 }
 
 .action-btn:hover {
-  color: #409eff !important;
-  background: rgba(64, 158, 255, 0.1) !important;
+  color: #409eff;
+  background: rgba(64, 158, 255, .1);
 }
 
-.action-btn.delete:hover {
-  color: #f56c6c !important;
-  background: rgba(245, 108, 108, 0.1) !important;
+.action-btn.action-del:hover {
+  color: #f56c6c;
+  background: rgba(245, 108, 108, .1);
 }
 
-.aside-footer {
-  padding: 12px 16px;
-  border-top: 1px solid rgba(255,255,255,.05);
-}
-
-.footer-info {
-  font-size: 11px;
-  color: #4a4e62;
+/* ── Footer ── */
+.sidebar-footer {
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, .04);
   text-align: center;
-  letter-spacing: 0.3px;
+  font-size: 11px;
+  color: #3e4256;
+  letter-spacing: .2px;
 }
 
+/* ── Main content ── */
 .app-main {
-  background: #f0f2f5;
+  background: #f5f6fa;
   padding: 0;
 }
 </style>
