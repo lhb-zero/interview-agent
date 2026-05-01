@@ -510,19 +510,25 @@ public class RagServiceImpl implements RagService {
      * - 检索到的文档片段作为 context 注入
      */
     private Prompt buildRagPrompt(ChatRequestDTO request, List<Document> similarDocs) {
-        // 拼接检索到的文档作为上下文
         String context;
         if (similarDocs.isEmpty()) {
-            context = "未检索到相关的参考资料，请基于你的知识回答。";
+            context = "[无相关参考资料]";
         } else {
-            context = similarDocs.stream()
-                    .map(doc -> {
-                        String docDomain = (String) doc.getMetadata().getOrDefault("domain", "");
-                        String docTitle = (String) doc.getMetadata().getOrDefault("title", "");
-                        int chunkIndex = (int) doc.getMetadata().getOrDefault("chunk_index", 0);
-                        return "【来源: " + docDomain + " / " + docTitle + " - 第" + (chunkIndex + 1) + "段】\n" + doc.getText();
-                    })
-                    .collect(Collectors.joining("\n\n---\n\n"));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < similarDocs.size(); i++) {
+                Document doc = similarDocs.get(i);
+                String docDomain = (String) doc.getMetadata().getOrDefault("domain", "");
+                String docTitle = (String) doc.getMetadata().getOrDefault("title", "");
+                String chunkIndex = String.valueOf(doc.getMetadata().getOrDefault("chunk_index", i + 1));
+                sb.append("【文档").append(i + 1).append("】领域: ").append(docDomain)
+                        .append(" | 标题: ").append(docTitle)
+                        .append("\n");
+                sb.append(doc.getText());
+                if (i < similarDocs.size() - 1) {
+                    sb.append("\n\n");
+                }
+            }
+            context = sb.toString();
         }
 
         String templateContent;
