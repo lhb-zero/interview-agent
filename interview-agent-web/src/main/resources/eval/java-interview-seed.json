@@ -1,0 +1,97 @@
+{
+  "name": "Java面试基础题库",
+  "description": "涵盖并发、集合、JVM、Spring等核心知识点的面试题",
+  "domain": "java",
+  "testCases": [
+    {
+      "question": "HashMap的put方法执行流程是什么？",
+      "groundTruthAnswer": "HashMap的put方法执行流程：1）计算key的hash值，经过扰动函数处理得到数组下标；2）如果该位置没有元素，直接插入新节点；3）如果该位置有元素，判断key是否相同（hash值相等且equals返回true），相同则覆盖value；4）如果key不同，判断当前节点是否为红黑树节点，是则按红黑树方式插入；5）如果是链表节点，遍历链表尾插法插入新节点，如果链表长度达到8且数组长度>=64，链表转红黑树；6）插入后判断是否需要扩容（元素数量超过容量*负载因子）。",
+      "groundTruthContexts": ["HashMap基于数组+链表+红黑树实现，put方法首先计算key的hash值定位数组下标，采用尾插法添加链表节点，链表长度达到阈值时转为红黑树"],
+      "difficulty": "中级"
+    },
+    {
+      "question": "什么是线程池？核心参数有哪些？",
+      "groundTruthAnswer": "线程池是Executor框架的核心组件，通过ThreadPoolExecutor类实现。核心参数包括：corePoolSize（核心线程数）、maximumPoolSize（最大线程数）、keepAliveTime（非核心线程空闲存活时间）、workQueue（任务队列）、threadFactory（线程工厂）、handler（拒绝策略）。当提交任务时，如果核心线程未满则创建核心线程执行；核心线程满则放入队列；队列满则创建非核心线程；线程数达到最大值则执行拒绝策略。",
+      "groundTruthContexts": ["ThreadPoolExecutor是Java线程池的核心实现类，构造函数包含7个核心参数：corePoolSize、maximumPoolSize、keepAliveTime、unit、workQueue、threadFactory、handler"],
+      "difficulty": "中级"
+    },
+    {
+      "question": "synchronized和ReentrantLock有什么区别？",
+      "groundTruthAnswer": "synchronized和ReentrantLock的区别：1）synchronized是JVM层面的关键字，ReentrantLock是API层面的类；2）synchronized自动释放锁，ReentrantLock必须手动释放（在finally中unlock）；3）ReentrantLock支持公平锁和非公平锁，synchronized只有非公平锁；4）ReentrantLock可以响应中断（lockInterruptibly），synchronized不能；5）ReentrantLock可以设置超时时间（tryLock），synchronized不能；6）ReentrantLock可以创建多个Condition实现精确唤醒，synchronized只能notifyAll。",
+      "groundTruthContexts": ["ReentrantLock是java.util.concurrent包中的锁实现，相比synchronized提供了更灵活的锁机制，支持公平锁、可中断锁、超时锁等功能"],
+      "difficulty": "中级"
+    },
+    {
+      "question": "JVM的垃圾回收算法有哪些？",
+      "groundTruthAnswer": "JVM垃圾回收算法主要有：1）标记-清除算法：先标记存活对象，再清除未标记对象，缺点是产生内存碎片；2）标记-复制算法：将内存分为两块，每次使用一块，GC时将存活对象复制到另一块，缺点是内存利用率低；3）标记-整理算法：标记后将存活对象向一端移动，然后清理边界外内存；4）分代收集算法：新生代用复制算法（Eden+Survivor），老年代用标记-清除或标记-整理算法。",
+      "groundTruthContexts": ["JVM垃圾回收算法包括标记-清除、标记-复制、标记-整理和分代收集四种，分代收集是目前主流JVM采用的策略"],
+      "difficulty": "中级"
+    },
+    {
+      "question": "Spring IOC的原理是什么？",
+      "groundTruthAnswer": "Spring IOC（控制反转）的原理：IOC是一种设计思想，将对象的创建和依赖关系的管理从应用程序代码转移到Spring容器。Spring通过BeanFactory/ApplicationContext容器管理Bean的生命周期和依赖注入。核心实现机制：1）读取配置（XML/注解/JavaConfig）获取Bean定义；2）通过反射创建Bean实例；3）处理依赖注入（构造器注入/Setter注入/字段注入）；4）管理Bean的生命周期（初始化、使用、销毁）。DI（依赖注入）是IOC的具体实现方式。",
+      "groundTruthContexts": ["Spring IOC容器通过BeanFactory和ApplicationContext接口实现，负责管理Bean的创建、装配和生命周期，支持构造器注入、Setter注入和字段注入三种依赖注入方式"],
+      "difficulty": "中级"
+    },
+    {
+      "question": "volatile关键字的作用是什么？",
+      "groundTruthAnswer": "volatile关键字有两个核心作用：1）保证可见性：当一个线程修改volatile变量时，其他线程能立即看到最新值。这是因为volatile变量写操作后会强制刷新到主内存，读操作前会强制从主内存读取。2）禁止指令重排序：通过内存屏障（Memory Barrier）禁止编译器和处理器对volatile变量前后的指令进行重排序。但volatile不保证原子性，例如i++操作不是原子的。典型应用场景：双重检查锁定的单例模式、状态标志位、读写锁的实现。",
+      "groundTruthContexts": ["volatile是Java中的轻量级同步机制，保证变量的可见性和有序性，但不保证原子性。通过内存屏障实现禁止指令重排序"],
+      "difficulty": "中级"
+    },
+    {
+      "question": "什么是死锁？如何避免死锁？",
+      "groundTruthAnswer": "死锁是指两个或多个线程互相持有对方需要的锁，导致所有线程都无法继续执行。死锁的四个必要条件：互斥条件、请求与保持条件、不可剥夺条件、循环等待条件。避免死锁的方法：1）固定加锁顺序：所有线程按相同的顺序获取锁；2）设置超时时间：使用tryLock设置超时，获取失败则释放已持有的锁；3）减少锁的粒度：缩小同步代码块范围；4）使用定时锁：Lock.tryLock(timeout)；5）死锁检测：通过jstack或ThreadMXBean检测死锁。",
+      "groundTruthContexts": ["死锁是多线程编程中的常见问题，需要互斥、请求与保持、不可剥夺、循环等待四个条件同时满足才会发生"],
+      "difficulty": "中级"
+    },
+    {
+      "question": "ArrayList和LinkedList的区别是什么？",
+      "groundTruthAnswer": "ArrayList和LinkedList的区别：1）底层数据结构：ArrayList基于动态数组，LinkedList基于双向链表；2）随机访问：ArrayList支持O(1)随机访问（实现了RandomAccess接口），LinkedList随机访问需要O(n)遍历；3）插入删除：ArrayList在尾部插入O(1)，中间插入需要移动元素O(n)；LinkedList在已知节点位置插入O(1)，但定位节点需要O(n)；4）内存占用：ArrayList存在空间浪费（扩容后可能有空闲空间），LinkedList每个节点额外存储前后指针；5）实际场景：查询多用ArrayList，增删多用LinkedList（但ArrayList在大多数场景下性能更优）。",
+      "groundTruthContexts": ["ArrayList基于Object数组实现，默认初始容量10，扩容时为原来的1.5倍。LinkedList基于双向链表实现，不支持随机访问"],
+      "difficulty": "基础"
+    },
+    {
+      "question": "Spring Bean的作用域有哪些？",
+      "groundTruthAnswer": "Spring Bean的作用域有5种：1）singleton（默认）：每个IOC容器中只有一个实例，所有引用指向同一个对象；2）prototype：每次获取Bean时都创建一个新实例；3）request：每个HTTP请求创建一个实例，请求结束销毁（仅Web应用）；4）session：每个HTTP会话创建一个实例，会话结束销毁（仅Web应用）；5）application：每个ServletContext创建一个实例（仅Web应用）。可以通过@Scope注解或XML的scope属性指定作用域。",
+      "groundTruthContexts": ["Spring支持singleton、prototype、request、session和application五种Bean作用域，默认为singleton"],
+      "difficulty": "基础"
+    },
+    {
+      "question": "什么是CAS？有什么问题？",
+      "groundTruthAnswer": "CAS（Compare And Swap）是一种无锁的原子操作，包含三个操作数：内存位置V、预期原值A、新值B。只有当V的值等于A时，才将V的值更新为B，否则不做任何操作。CAS是乐观锁的实现方式，java.util.concurrent.atomic包下的原子类都基于CAS实现。CAS的问题：1）ABA问题：值从A改为B再改回A，CAS会误认为没有变化。解决：使用AtomicStampedReference添加版本号；2）自旋开销：CAS失败会不断重试，长时间自旋浪费CPU；3）只能保证单个变量的原子性，不能保证多个变量的复合操作原子性。",
+      "groundTruthContexts": ["CAS是CPU级别的原子指令，Java通过Unsafe类调用CAS指令。AtomicInteger等原子类基于CAS实现无锁线程安全"],
+      "difficulty": "高级"
+    },
+    {
+      "question": "MySQL的索引类型有哪些？",
+      "groundTruthAnswer": "MySQL索引类型：1）B+树索引（默认）：适合范围查询和排序，InnoDB和MyISAM都支持；2）哈希索引：Memory引擎支持，适合等值查询，不支持范围查询；3）全文索引（FULLTEXT）：用于全文搜索；4）空间索引（R-Tree）：用于地理空间数据。从功能角度分类：普通索引、唯一索引、主键索引、联合索引、覆盖索引。InnoDB中聚簇索引的叶子节点存储完整数据行，非聚簇索引的叶子节点存储主键值（需要回表查询）。",
+      "groundTruthContexts": ["MySQL InnoDB默认使用B+树索引，聚簇索引的叶子节点存储数据行，二级索引的叶子节点存储主键值需要回表"],
+      "difficulty": "中级"
+    },
+    {
+      "question": "什么是AOP？Spring AOP的实现原理？",
+      "groundTruthAnswer": "AOP（面向切面编程）是一种编程思想，用于将横切关注点（如日志、事务、权限）从业务逻辑中分离出来。核心概念：切面（Aspect）、连接点（JoinPoint）、切入点（Pointcut）、通知（Advice）、织入（Weaving）。Spring AOP的实现原理：对于实现了接口的类，使用JDK动态代理（基于Proxy和InvocationHandler）；对于没有实现接口的类，使用CGLIB代理（基于字节码生成子类）。Spring Boot 2.x默认使用CGLIB代理。",
+      "groundTruthContexts": ["Spring AOP通过JDK动态代理或CGLIB实现，JDK代理基于接口，CGLIB基于继承。Spring Boot默认使用CGLIB代理"],
+      "difficulty": "中级"
+    },
+    {
+      "question": "ConcurrentHashMap的实现原理？",
+      "groundTruthAnswer": "ConcurrentHashMap在JDK7和JDK8中实现不同。JDK7：使用分段锁（Segment），每个Segment是一个小的HashMap，默认16个Segment，最大支持16个线程并发写。JDK8：抛弃Segment，使用CAS + synchronized实现更细粒度的锁。结构与HashMap相同（数组+链表+红黑树），锁粒度是数组的每个桶（Node）。put操作：1）计算hash定位桶；2）如果桶为空，CAS插入新节点；3）如果桶不为空，synchronized锁住该桶的头节点，然后遍历链表或红黑树插入；4）链表长度>=8时转红黑树。",
+      "groundTruthContexts": ["JDK8的ConcurrentHashMap使用CAS+synchronized实现，锁粒度为单个桶（Node），放弃JDK7的Segment分段锁设计"],
+      "difficulty": "高级"
+    },
+    {
+      "question": "Spring事务的传播行为有哪些？",
+      "groundTruthAnswer": "Spring定义了7种事务传播行为：1）REQUIRED（默认）：当前有事务就加入，没有就新建；2）SUPPORTS：当前有事务就加入，没有就以非事务方式运行；3）MANDATORY：当前必须有事务，否则抛异常；4）REQUIRES_NEW：总是新建事务，当前事务挂起；5）NOT_SUPPORTED：以非事务方式运行，当前事务挂起；6）NEVER：以非事务方式运行，当前有事务则抛异常；7）NESTED：当前有事务则创建嵌套事务（savepoint），没有则新建。最常用的是REQUIRED和REQUIRES_NEW。",
+      "groundTruthContexts": ["Spring通过@Transactional注解声明事务，支持7种传播行为，REQUIRED是默认值，REQUIRES_NEW用于需要独立事务的场景"],
+      "difficulty": "中级"
+    },
+    {
+      "question": "什么是类加载机制？双亲委派模型？",
+      "groundTruthAnswer": "Java类加载机制：类的生命周期包括加载、验证、准备、解析、初始化五个阶段。双亲委派模型：当一个类加载器收到加载请求时，先委派给父加载器加载，父加载器无法加载时才自己加载。三层类加载器：1）Bootstrap ClassLoader（启动类加载器）：加载JAVA_HOME/lib下的核心类库；2）Extension ClassLoader（扩展类加载器）：加载JAVA_HOME/lib/ext下的扩展类；3）Application ClassLoader（应用程序类加载器）：加载classpath下的用户类。双亲委派的好处：避免类的重复加载，保护核心类库不被篡改。",
+      "groundTruthContexts": ["JVM类加载采用双亲委派模型，加载请求优先委派给父加载器，保证核心类库的安全性和唯一性"],
+      "difficulty": "中级"
+    }
+  ]
+}

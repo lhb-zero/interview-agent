@@ -115,3 +115,109 @@ COMMENT ON COLUMN favorite_question.difficulty IS '难度级别';
 
 CREATE INDEX idx_favorite_question_session_id ON favorite_question(session_id);
 CREATE INDEX idx_favorite_question_domain ON favorite_question(domain);
+
+-- =====================================================
+-- 5. 评估数据集表
+-- =====================================================
+CREATE TABLE IF NOT EXISTS eval_dataset (
+    id              BIGSERIAL       PRIMARY KEY,
+    name            VARCHAR(100)    NOT NULL,
+    description     TEXT,
+    domain          VARCHAR(50),
+    test_case_count INT             DEFAULT 0,
+    status          VARCHAR(20)     DEFAULT 'ACTIVE',
+    created_at      TIMESTAMP       DEFAULT NOW(),
+    updated_at      TIMESTAMP       DEFAULT NOW()
+);
+
+COMMENT ON TABLE  eval_dataset IS '评估数据集表';
+COMMENT ON COLUMN eval_dataset.name IS '数据集名称';
+COMMENT ON COLUMN eval_dataset.domain IS '技术领域';
+COMMENT ON COLUMN eval_dataset.test_case_count IS '测试用例数量';
+
+CREATE INDEX idx_eval_dataset_domain ON eval_dataset(domain);
+CREATE INDEX idx_eval_dataset_status ON eval_dataset(status);
+
+-- =====================================================
+-- 6. 评估测试用例表
+-- =====================================================
+CREATE TABLE IF NOT EXISTS eval_test_case (
+    id                      BIGSERIAL       PRIMARY KEY,
+    dataset_id              BIGINT          NOT NULL,
+    question                TEXT            NOT NULL,
+    ground_truth_answer     TEXT,
+    ground_truth_contexts   TEXT,
+    difficulty              VARCHAR(20)     DEFAULT '中级',
+    domain                  VARCHAR(50),
+    created_at              TIMESTAMP       DEFAULT NOW()
+);
+
+COMMENT ON TABLE  eval_test_case IS '评估测试用例表';
+COMMENT ON COLUMN eval_test_case.question IS '测试问题';
+COMMENT ON COLUMN eval_test_case.ground_truth_answer IS '标准答案';
+COMMENT ON COLUMN eval_test_case.ground_truth_contexts IS '标准上下文（JSON数组）';
+
+CREATE INDEX idx_eval_test_case_dataset_id ON eval_test_case(dataset_id);
+
+-- =====================================================
+-- 7. 评估实验表
+-- =====================================================
+CREATE TABLE IF NOT EXISTS eval_experiment (
+    id                      BIGSERIAL       PRIMARY KEY,
+    name                    VARCHAR(100)    NOT NULL,
+    dataset_id              BIGINT          NOT NULL,
+    query_rewrite_enabled   BOOLEAN         DEFAULT TRUE,
+    hybrid_search_enabled   BOOLEAN         DEFAULT TRUE,
+    reranker_enabled        BOOLEAN         DEFAULT TRUE,
+    avg_context_precision   DOUBLE PRECISION,
+    avg_context_recall      DOUBLE PRECISION,
+    avg_faithfulness        DOUBLE PRECISION,
+    avg_answer_relevancy    DOUBLE PRECISION,
+    overall_score           DOUBLE PRECISION,
+    total_cases             INT             DEFAULT 0,
+    completed_cases         INT             DEFAULT 0,
+    failed_cases            INT             DEFAULT 0,
+    status                  VARCHAR(20)     DEFAULT 'PENDING',
+    error_message           TEXT,
+    started_at              TIMESTAMP,
+    completed_at            TIMESTAMP,
+    created_at              TIMESTAMP       DEFAULT NOW()
+);
+
+COMMENT ON TABLE  eval_experiment IS '评估实验表';
+COMMENT ON COLUMN eval_experiment.status IS '状态：PENDING/RUNNING/COMPLETED/FAILED/CANCELLED';
+
+CREATE INDEX idx_eval_experiment_dataset_id ON eval_experiment(dataset_id);
+CREATE INDEX idx_eval_experiment_status ON eval_experiment(status);
+
+-- =====================================================
+-- 8. 评估结果明细表
+-- =====================================================
+CREATE TABLE IF NOT EXISTS eval_result (
+    id                      BIGSERIAL       PRIMARY KEY,
+    experiment_id           BIGINT          NOT NULL,
+    test_case_id            BIGINT          NOT NULL,
+    generated_answer        TEXT,
+    retrieved_contexts      TEXT,
+    rewritten_query         TEXT,
+    context_precision       DOUBLE PRECISION,
+    context_recall          DOUBLE PRECISION,
+    faithfulness            DOUBLE PRECISION,
+    answer_relevancy        DOUBLE PRECISION,
+    precision_details       TEXT,
+    recall_details          TEXT,
+    faithfulness_details    TEXT,
+    relevancy_details       TEXT,
+    retrieval_time_ms       INT,
+    generation_time_ms      INT,
+    eval_time_ms            INT,
+    status                  VARCHAR(20)     DEFAULT 'PENDING',
+    error_message           TEXT,
+    created_at              TIMESTAMP       DEFAULT NOW()
+);
+
+COMMENT ON TABLE  eval_result IS '评估结果明细表';
+
+CREATE INDEX idx_eval_result_experiment_id ON eval_result(experiment_id);
+CREATE INDEX idx_eval_result_test_case_id ON eval_result(test_case_id);
+CREATE INDEX idx_eval_result_status ON eval_result(status);

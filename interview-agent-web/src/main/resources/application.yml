@@ -117,6 +117,25 @@ app:
     # 是否在包含指代词时触发改写（它/这个/那个/上面/前文等）
     need-rewrite-when-has-pronoun: true
 
+  # ==================== RAG 评估配置 ====================
+  # LLM-as-Judge 方式评估 RAG 效果（自实现 RAGAS 核心指标）
+  eval:
+    enabled: true
+    judge:
+      model: qwen3:1.7b
+      temperature: 0.1
+      max-retries: 2
+      timeout-ms: 60000
+    metrics:
+      context-precision-enabled: true
+      context-recall-enabled: true
+      faithfulness-enabled: true
+      answer-relevancy-enabled: true
+      relevancy-synthetic-questions: 5
+    execution:
+      concurrency: 1
+      batch-size: 10
+
 # ==================== MyBatis-Plus 配置 ====================
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml

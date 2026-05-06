@@ -10,6 +10,16 @@ const routes = [
     path: '/knowledge',
     name: 'Knowledge',
     component: () => import('../views/KnowledgeView.vue')
+  },
+  {
+    path: '/eval',
+    name: 'Eval',
+    component: () => import('../views/EvalView.vue')
+  },
+  {
+    path: '/eval/:experimentId',
+    name: 'EvalDetail',
+    component: () => import('../views/EvalDetailView.vue')
   }
 ]
 

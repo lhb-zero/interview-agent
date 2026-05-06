@@ -25,7 +25,10 @@ public enum ResultCode {
     EMBEDDING_ERROR(5003, "向量生成失败"),
     RAG_SEARCH_ERROR(5004, "RAG检索失败"),
     CHAT_ERROR(5005, "对话生成失败"),
-    VECTOR_STORE_ERROR(5006, "向量存储失败");
+    VECTOR_STORE_ERROR(5006, "向量存储失败"),
+    EVAL_ERROR(5007, "评估执行失败"),
+    EVAL_DATASET_ERROR(5008, "数据集操作失败"),
+    EVAL_EXPERIMENT_NOT_FOUND(5009, "评估实验不存在");
 
     private final int code;
     private final String message;

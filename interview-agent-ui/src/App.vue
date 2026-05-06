@@ -33,6 +33,10 @@
             <el-icon><Folder /></el-icon>
             <span>知识库管理</span>
           </el-menu-item>
+          <el-menu-item index="/eval">
+            <el-icon><DataAnalysis /></el-icon>
+            <span>RAG 评估</span>
+          </el-menu-item>
         </el-menu>
       </nav>
 
@@ -99,7 +103,7 @@
 <script setup>
 import { ref, computed, onMounted, provide, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Plus, Edit, Delete } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, DataAnalysis } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from './utils/request'
 
