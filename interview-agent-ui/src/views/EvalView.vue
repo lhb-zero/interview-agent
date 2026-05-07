@@ -145,6 +145,10 @@
         <el-form-item label="Reranker精排">
           <el-switch v-model="experimentForm.rerankerEnabled" />
         </el-form-item>
+        <el-form-item label="运行题数">
+          <el-input-number v-model="experimentForm.maxCases" :min="0" :max="selectedDatasetCaseCount" :step="1" />
+          <span class="form-tip">{{ experimentForm.maxCases > 0 ? `运行前 ${experimentForm.maxCases} 题` : '全部运行' }}</span>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showExperimentDialog = false">取消</el-button>
@@ -175,7 +179,12 @@ const creating = ref(false)
 let pollTimer = null
 
 const importForm = ref({ name: '', description: '', domain: 'java', jsonContent: '' })
-const experimentForm = ref({ name: '', datasetId: null, queryRewriteEnabled: true, hybridSearchEnabled: true, rerankerEnabled: true })
+const experimentForm = ref({ name: '', datasetId: null, queryRewriteEnabled: true, hybridSearchEnabled: true, rerankerEnabled: true, maxCases: 0 })
+
+const selectedDatasetCaseCount = computed(() => {
+  const ds = datasets.value.find(d => d.id === experimentForm.value.datasetId)
+  return ds ? ds.testCaseCount : 99
+})
 
 const latestScore = computed(() => {
   const recent = dashboard.value.recentExperiments
@@ -290,7 +299,7 @@ async function handleCreateExperiment() {
     await request.post('/eval/experiments', experimentForm.value)
     ElMessage.success('实验已创建，正在后台运行')
     showExperimentDialog.value = false
-    experimentForm.value = { name: '', datasetId: null, queryRewriteEnabled: true, hybridSearchEnabled: true, rerankerEnabled: true }
+    experimentForm.value = { name: '', datasetId: null, queryRewriteEnabled: true, hybridSearchEnabled: true, rerankerEnabled: true, maxCases: 0 }
     loadExperiments()
     loadDashboard()
   } catch (e) {
@@ -425,4 +434,10 @@ function scoreClass(score) {
 .score-high { color: #67c23a; }
 .score-mid { color: #e6a23c; }
 .score-low { color: #f56c6c; }
+
+.form-tip {
+  margin-left: 12px;
+  font-size: 13px;
+  color: #909399;
+}
 </style>

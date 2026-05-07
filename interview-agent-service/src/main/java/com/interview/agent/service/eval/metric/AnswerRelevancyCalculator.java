@@ -16,7 +16,7 @@ import java.util.*;
 @Component
 public class AnswerRelevancyCalculator implements MetricCalculator {
 
-    private static final String GEN_PROMPT_TEMPLATE = "请根据以下面试回答，生成%d个可能引出此回答的面试问题。问题应该多样化，从不同角度提问。以JSON数组格式输出。";
+    private static final String GEN_PROMPT_TEMPLATE = "请根据以下面试回答，生成%d个可能引出此回答的面试问题。问题应该多样化，从不同角度提问。\n\n严格要求：只输出一个JSON字符串数组，不要添加任何其他字段或格式。\n示例输出格式：[\"问题1\", \"问题2\", \"问题3\"]";
 
     private final LlmJudgeClient judgeClient;
     private final EmbeddingModel embeddingModel;

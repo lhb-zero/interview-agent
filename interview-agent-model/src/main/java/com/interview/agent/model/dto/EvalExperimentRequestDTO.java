@@ -30,4 +30,7 @@ public class EvalExperimentRequestDTO implements Serializable {
 
     /** 是否启用Reranker */
     private Boolean rerankerEnabled = true;
+
+    /** 最大测试用例数（null 或 0 表示全部运行） */
+    private Integer maxCases;
 }

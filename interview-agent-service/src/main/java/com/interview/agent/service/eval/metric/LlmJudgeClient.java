@@ -11,8 +11,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,13 +81,24 @@ public class LlmJudgeClient {
 
     /**
      * 调用 LLM Judge 并解析 JSON 数组响应
+     * 兼容两种格式：字符串数组 ["q1","q2"] 或对象数组 [{"question":"q1"},...]
      */
     public List<String> judgeJsonArray(String systemPrompt, String userPrompt) {
         String response = judge(systemPrompt, userPrompt);
         try {
-            // 尝试提取 JSON 数组部分
             String json = extractJsonArray(response);
-            return objectMapper.readValue(json, new TypeReference<List<String>>() {});
+            // 先尝试解析为字符串数组
+            try {
+                return objectMapper.readValue(json, new TypeReference<List<String>>() {});
+            } catch (Exception ignored) {}
+            // 如果失败，尝试解析为对象数组并提取 "question" 字段
+            List<Map<String, Object>> objects = objectMapper.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
+            List<String> result = new ArrayList<>();
+            for (Map<String, Object> obj : objects) {
+                Object q = obj.get("question");
+                if (q != null) result.add(q.toString());
+            }
+            return result;
         } catch (Exception e) {
             log.warn("[Eval-Judge] JSON 解析失败: {}, response: {}", e.getMessage(), response);
             return Collections.emptyList();
@@ -102,8 +112,8 @@ public class LlmJudgeClient {
         // 先尝试直接解析
         String trimmed = response.trim();
         if (trimmed.startsWith("[")) return trimmed;
-        // 尝试从 markdown 代码块中提取
-        Pattern pattern = Pattern.compile("```(?:json)?\\s*\\n?(\\[.*?])\\s*```", Pattern.DOTALL);
+        // 尝试从 markdown 代码块中提取（贪婪匹配整个数组）
+        Pattern pattern = Pattern.compile("```(?:json)?\\s*\\n?(\\[.*])\\s*```", Pattern.DOTALL);
         Matcher matcher = pattern.matcher(response);
         if (matcher.find()) return matcher.group(1);
         // 尝试找第一个 [ 到最后一个 ]
