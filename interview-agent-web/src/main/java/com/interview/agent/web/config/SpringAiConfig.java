@@ -3,7 +3,7 @@ package com.interview.agent.web.config;
 import com.interview.agent.service.rag.transformer.DocumentTextCleaner;
 import com.interview.agent.service.rag.transformer.SmartTextSplitter;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 public class SpringAiConfig {
 
     @Bean
-    public ChatClient chatClient(OllamaChatModel chatModel) {
+    public ChatClient chatClient(ChatModel chatModel) {
         return ChatClient.builder(chatModel).build();
     }
 

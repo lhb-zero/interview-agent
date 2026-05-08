@@ -1,7 +1,7 @@
 请评估以下面试回答的质量。
 
-面试题目：<question>
-候选人回答：<user_answer>
+面试题目：{question}
+候选人回答：{user_answer}
 
 评估要求：
 1. 评分：1-10分

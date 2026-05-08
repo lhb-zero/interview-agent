@@ -10,6 +10,8 @@ import com.interview.agent.model.entity.ChatMessage;
 import com.interview.agent.model.entity.ChatSession;
 import com.interview.agent.model.vo.ChatMessageVO;
 import com.interview.agent.model.vo.ChatSessionVO;
+import com.interview.agent.service.chat.ChatOptionsFactory;
+import com.interview.agent.service.chat.ChatProviderProperties;
 import com.interview.agent.service.tool.KnowledgeSearchTool;
 import com.interview.agent.service.tool.QuestionGenerateTool;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -22,7 +24,6 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -51,12 +52,11 @@ public class ChatServiceImpl implements ChatService {
     private final ChatMessageMapper messageMapper;
     private final KnowledgeSearchTool knowledgeSearchTool;
     private final QuestionGenerateTool questionGenerateTool;
+    private final ChatOptionsFactory chatOptionsFactory;
+    private final ChatProviderProperties chatProviderProperties;
 
     @Value("classpath:/prompts/interview-system.st")
     private Resource systemPromptResource;
-
-    @Value("${spring.ai.ollama.chat.options.model}")
-    private String modelName;
 
     @Override
     public ChatMessageVO chat(ChatRequestDTO request) {
@@ -80,7 +80,7 @@ public class ChatServiceImpl implements ChatService {
                 log.info("[Chat] Tool Calling 已注册: KnowledgeSearchTool, QuestionGenerateTool");
             }
 
-            log.info("[Chat] 开始同步调用LLM: model={}, sessionId={}, ragEnabled={}", modelName, sessionId, request.getRagEnabled());
+            log.info("[Chat] 开始同步调用LLM: model={}, sessionId={}, ragEnabled={}", chatProviderProperties.getModelName(), sessionId, request.getRagEnabled());
             response = requestSpec.call().content();
             log.info("[Chat] LLM同步响应完成: sessionId={}, 响应长度={}", sessionId, response != null ? response.length() : 0);
             log.debug("[Chat] LLM同步响应内容:\n{}", response);
@@ -121,7 +121,7 @@ public class ChatServiceImpl implements ChatService {
             log.info("[ChatStream] Tool Calling 已注册: KnowledgeSearchTool, QuestionGenerateTool");
         }
 
-        log.info("[ChatStream] 开始流式调用LLM: model={}, sessionId={}, ragEnabled={}", modelName, sessionId, request.getRagEnabled());
+        log.info("[ChatStream] 开始流式调用LLM: model={}, sessionId={}, ragEnabled={}", chatProviderProperties.getModelName(), sessionId, request.getRagEnabled());
 
         StringBuilder fullResponse = new StringBuilder();
         return requestSpec
@@ -198,7 +198,7 @@ public class ChatServiceImpl implements ChatService {
         ChatSession session = new ChatSession();
         session.setSessionId(sessionId);
         session.setDomain(request.getDomain());
-        session.setModelName(modelName);
+        session.setModelName(chatProviderProperties.getModelName());
         session.setCreatedAt(LocalDateTime.now());
         sessionMapper.insert(session);
         return sessionId;
@@ -245,18 +245,11 @@ public class ChatServiceImpl implements ChatService {
         messages.add(new UserMessage(request.getMessage()));
 
         log.info("[Prompt] 构建完成: model={}, domain={}, difficulty={}, historyCount={}, totalMessages={}, userMessage='{}'",
-                modelName, request.getDomain(), request.getDifficulty(), historyCount, messages.size(),
+                chatProviderProperties.getModelName(), request.getDomain(), request.getDifficulty(), historyCount, messages.size(),
                 request.getMessage().length() > 50 ? request.getMessage().substring(0, 50) + "..." : request.getMessage());
         log.debug("[Prompt] System Prompt内容:\n{}", systemContent);
 
-        OllamaChatOptions.Builder optionsBuilder = OllamaChatOptions.builder();
-        if (Boolean.TRUE.equals(request.getThinkingEnabled())) {
-            optionsBuilder.enableThinking();
-        } else {
-            optionsBuilder.disableThinking();
-        }
-
-        return new Prompt(messages, optionsBuilder.build());
+        return new Prompt(messages, chatOptionsFactory.buildThinkingOptions(Boolean.TRUE.equals(request.getThinkingEnabled())));
     }
 
     /**

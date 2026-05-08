@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  *   app:
  *     reranker:
  *       enabled: true
- *       url: http://localhost:8081
+ *       url: http://localhost:18081
  *       candidate-count: 20
  *       top-k: 5
  *       score-threshold: 0.0
@@ -31,7 +31,7 @@ public class RerankerProperties {
     private boolean enabled = false;
 
     /** TEI Reranker 服务地址 */
-    private String url = "http://localhost:8081";
+    private String url = "http://localhost:18081";
 
     /** 向量检索阶段召回的候选文档数（送入 Reranker 的输入量） */
     private int candidateCount = 20;

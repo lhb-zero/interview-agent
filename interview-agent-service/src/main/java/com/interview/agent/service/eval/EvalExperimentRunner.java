@@ -12,6 +12,7 @@ import com.interview.agent.model.entity.EvalTestCase;
 import com.interview.agent.model.enums.EvalStatusEnum;
 import com.interview.agent.service.eval.metric.MetricCalculator;
 import com.interview.agent.service.eval.metric.MetricScore;
+import com.interview.agent.service.chat.ChatOptionsFactory;
 import com.interview.agent.service.rag.hybrid.HybridSearchProperties;
 import com.interview.agent.service.rag.hybrid.HybridSearchService;
 import com.interview.agent.service.rag.reranker.RerankingDocumentPostProcessor;
@@ -24,7 +25,6 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +58,7 @@ public class EvalExperimentRunner {
 
     private final List<MetricCalculator> calculators;
     private final ChatModel chatModel;
+    private final ChatOptionsFactory chatOptionsFactory;
 
     @Value("classpath:/prompts/rag-enhanced-answer.st")
     private Resource ragPromptResource;
@@ -76,7 +77,8 @@ public class EvalExperimentRunner {
             RerankingDocumentPostProcessor rerankingPostProcessor,
             RerankerProperties rerankerProperties,
             List<MetricCalculator> calculators,
-            ChatModel chatModel) {
+            ChatModel chatModel,
+            ChatOptionsFactory chatOptionsFactory) {
         this.experimentMapper = experimentMapper;
         this.resultMapper = resultMapper;
         this.testCaseMapper = testCaseMapper;
@@ -89,6 +91,7 @@ public class EvalExperimentRunner {
         this.rerankerProperties = rerankerProperties;
         this.calculators = calculators;
         this.chatModel = chatModel;
+        this.chatOptionsFactory = chatOptionsFactory;
     }
 
     @Async
@@ -274,13 +277,10 @@ public class EvalExperimentRunner {
         PromptTemplate template = new PromptTemplate(templateContent);
         String systemContent = template.render(Map.of("context", context, "question", question));
 
-        OllamaChatOptions options = OllamaChatOptions.builder()
-                .disableThinking()
-                .build();
         Prompt prompt = new Prompt(List.of(
                 new SystemMessage(systemContent),
                 new UserMessage(question)
-        ), options);
+        ), chatOptionsFactory.buildThinkingOptions(false));
 
         return chatModel.call(prompt).getResult().getOutput().getText();
     }

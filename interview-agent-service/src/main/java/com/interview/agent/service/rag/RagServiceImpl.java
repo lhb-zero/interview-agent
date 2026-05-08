@@ -17,6 +17,8 @@ import com.interview.agent.service.rag.hybrid.HybridSearchService;
 import com.interview.agent.service.rag.reranker.RerankingDocumentPostProcessor;
 import com.interview.agent.service.rag.reranker.RerankerProperties;
 import com.interview.agent.service.rag.rewrite.QueryRewriteService;
+import com.interview.agent.service.chat.ChatOptionsFactory;
+import com.interview.agent.service.chat.ChatProviderProperties;
 import com.interview.agent.service.rag.transformer.DocumentTextCleaner;
 import com.interview.agent.service.rag.transformer.SmartTextSplitter;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +35,6 @@ import org.springframework.ai.reader.TextReader;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.reader.pdf.ParagraphPdfDocumentReader;
 import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
-import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,12 +78,11 @@ public class RagServiceImpl implements RagService {
     private final ChatSessionMapper sessionMapper;
     private final ChatMessageMapper messageMapper;
     private final JdbcTemplate jdbcTemplate;
+    private final ChatOptionsFactory chatOptionsFactory;
+    private final ChatProviderProperties chatProviderProperties;
 
     @Value("classpath:/prompts/rag-enhanced-answer.st")
     private Resource ragPromptResource;
-
-    @Value("${spring.ai.ollama.chat.options.model}")
-    private String modelName;
 
     /** 相似度阈值 — 低于此值的检索结果不参与增强（余弦相似度范围 -1~1，越高越相似） */
     private static final double SIMILARITY_THRESHOLD = CommonConstant.RAG_SIMILARITY_THRESHOLD;
@@ -105,7 +105,7 @@ public class RagServiceImpl implements RagService {
         // 4. 调用LLM
         String response;
         try {
-            log.info("[RAG-Chat] 开始同步调用LLM: model={}, sessionId={}, similarDocs={}", modelName, sessionId, similarDocs.size());
+            log.info("[RAG-Chat] 开始同步调用LLM: model={}, sessionId={}, similarDocs={}", chatProviderProperties.getModelName(), sessionId, similarDocs.size());
             response = chatClient.prompt(prompt)
                     .call()
                     .content();
@@ -568,19 +568,12 @@ public class RagServiceImpl implements RagService {
         messages.add(new UserMessage(request.getMessage()));
 
         log.info("[RAG-Prompt] 构建完成: model={}, similarDocs={}, contextLength={}, historyCount={}, totalMessages={}, userMessage='{}'",
-                modelName, similarDocs.size(), context.length(), historyCount, messages.size(),
+                chatProviderProperties.getModelName(), similarDocs.size(), context.length(), historyCount, messages.size(),
                 request.getMessage().length() > 50 ? request.getMessage().substring(0, 50) + "..." : request.getMessage());
         log.debug("[RAG-Prompt] RAG上下文内容:\n{}", context);
         log.debug("[RAG-Prompt] System Prompt内容:\n{}", systemContent);
 
-        OllamaChatOptions.Builder optionsBuilder = OllamaChatOptions.builder();
-        if (Boolean.TRUE.equals(request.getThinkingEnabled())) {
-            optionsBuilder.enableThinking();
-        } else {
-            optionsBuilder.disableThinking();
-        }
-
-        return new Prompt(messages, optionsBuilder.build());
+        return new Prompt(messages, chatOptionsFactory.buildThinkingOptions(Boolean.TRUE.equals(request.getThinkingEnabled())));
     }
 
     private String getOrCreateSession(ChatRequestDTO request) {
@@ -591,7 +584,7 @@ public class RagServiceImpl implements RagService {
         ChatSession session = new ChatSession();
         session.setSessionId(sessionId);
         session.setDomain(request.getDomain());
-        session.setModelName(modelName);
+        session.setModelName(chatProviderProperties.getModelName());
         session.setCreatedAt(LocalDateTime.now());
         sessionMapper.insert(session);
         return sessionId;

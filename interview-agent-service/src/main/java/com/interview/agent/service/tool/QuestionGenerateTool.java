@@ -4,8 +4,7 @@ import com.interview.agent.common.constant.CommonConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.ollama.OllamaChatModel;
-import org.springframework.ai.ollama.api.OllamaChatOptions;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.context.annotation.Lazy;
@@ -24,10 +23,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuestionGenerateTool {
 
-    private final OllamaChatModel chatModel;
+    private final ChatModel chatModel;
 
     @Lazy
-    public QuestionGenerateTool(OllamaChatModel chatModel) {
+    public QuestionGenerateTool(ChatModel chatModel) {
         this.chatModel = chatModel;
     }
 
@@ -51,9 +50,7 @@ public class QuestionGenerateTool {
                     domain, questionCount, difficulty
             );
 
-            OllamaChatOptions options = OllamaChatOptions.builder()
-                    .build();
-            return chatModel.call(new Prompt(new UserMessage(prompt), options))
+            return chatModel.call(new Prompt(new UserMessage(prompt)))
                     .getResult()
                     .getOutput()
                     .getText();

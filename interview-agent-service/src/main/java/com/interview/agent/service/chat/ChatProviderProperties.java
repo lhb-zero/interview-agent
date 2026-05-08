@@ -25,4 +25,12 @@ public class ChatProviderProperties {
     public String getProvider() {
         return chat;
     }
+
+    public boolean isDeepSeek() {
+        return "deepseek".equals(chat);
+    }
+
+    public boolean isOllama() {
+        return "ollama".equals(chat);
+    }
 }

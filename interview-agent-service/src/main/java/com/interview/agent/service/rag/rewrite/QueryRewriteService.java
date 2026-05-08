@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.ollama.OllamaChatModel;
-import org.springframework.ai.ollama.api.OllamaChatOptions;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class QueryRewriteService {
 
-    private final OllamaChatModel chatModel;
+    private final ChatModel chatModel;
     private final QueryRewriteProperties properties;
 
     @Value("classpath:/prompts/query-rewrite.st")
@@ -59,13 +58,10 @@ public class QueryRewriteService {
         log.info("[Query-Rewrite] 开始改写: original='{}'", query);
 
         try {
-            OllamaChatOptions options = OllamaChatOptions.builder()
-                    .build();
-
             Prompt prompt = new Prompt(List.of(
                     new SystemMessage(templateContent),
                     new UserMessage(query)
-            ), options);
+            ));
 
             String rewritten = chatModel.call(prompt)
                     .getResult()

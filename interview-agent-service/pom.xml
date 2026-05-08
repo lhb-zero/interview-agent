@@ -35,6 +35,12 @@
             <artifactId>spring-ai-starter-model-ollama</artifactId>
         </dependency>
 
+        <!-- Spring AI - OpenAI (用于 DeepSeek 等 OpenAI 兼容 API) -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+        </dependency>
+
         <!-- Spring AI - PGVector VectorStore (1.0.0 GA 新命名) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>

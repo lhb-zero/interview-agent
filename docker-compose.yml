@@ -47,7 +47,7 @@ services:
     image: ghcr.1ms.run/huggingface/text-embeddings-inference:cpu-1.9
     container_name: interview-agent-reranker
     ports:
-      - "8081:80"
+      - "18081:80"
     volumes:
       - D:/models/bce-reranker-base_v1:/data/maidalun/bce-reranker-base_v1
     environment:

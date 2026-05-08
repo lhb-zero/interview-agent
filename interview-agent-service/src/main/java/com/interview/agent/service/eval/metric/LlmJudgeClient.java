@@ -8,7 +8,8 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.ollama.api.OllamaChatOptions;
+import com.interview.agent.service.chat.ChatOptionsFactory;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -24,11 +25,13 @@ public class LlmJudgeClient {
 
     private final ChatModel chatModel;
     private final EvalProperties properties;
+    private final ChatOptionsFactory chatOptionsFactory;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public LlmJudgeClient(ChatModel chatModel, EvalProperties properties) {
+    public LlmJudgeClient(ChatModel chatModel, EvalProperties properties, ChatOptionsFactory chatOptionsFactory) {
         this.chatModel = chatModel;
         this.properties = properties;
+        this.chatOptionsFactory = chatOptionsFactory;
     }
 
     /**
@@ -38,11 +41,8 @@ public class LlmJudgeClient {
         EvalProperties.JudgeModel judgeConfig = properties.getJudge();
         for (int attempt = 0; attempt <= judgeConfig.getMaxRetries(); attempt++) {
             try {
-                OllamaChatOptions options = OllamaChatOptions.builder()
-                        .model(judgeConfig.getModel())
-                        .temperature(judgeConfig.getTemperature())
-                        .numCtx(4096)
-                        .build();
+                ChatOptions options = chatOptionsFactory.buildJudgeOptions(
+                        judgeConfig.getModel(), judgeConfig.getTemperature(), 4096);
                 Prompt prompt = new Prompt(List.of(
                         new SystemMessage(systemPrompt),
                         new UserMessage(userPrompt)

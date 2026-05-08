@@ -16,6 +16,12 @@ spring:
 
   # ==================== Spring AI 配置 ====================
   ai:
+    # 模型提供商切换: ollama(本地) / deepseek(云端API)
+    model:
+      chat: deepseek
+      embedding: ollama
+      model-name: deepseek-v4-pro
+
     # Ollama 配置
     ollama:
       base-url: http://localhost:11434
@@ -29,6 +35,17 @@ spring:
       embedding:
         options:
           model: bge-m3
+
+    # DeepSeek 配置（通过 OpenAI 兼容接口调用）
+    # 切换方式：将 spring.ai.model.chat 改为 deepseek
+    openai:
+      base-url: https://api.deepseek.com
+      api-key: sk-15a647786c2942d0bf9331f46b3dbfa8
+      chat:
+        options:
+          model: deepseek-v4-pro
+          temperature: 0.5
+
 
     # PGVector 向量存储配置
     vectorstore:
@@ -56,7 +73,7 @@ app:
   reranker:
     enabled: true
     # TEI Reranker 服务地址（对应 docker-compose 中 tei-reranker 容器）
-    url: http://localhost:8081
+    url: http://localhost:18081
     # 向量检索阶段召回的候选文档数（送入 Reranker 的输入量）
     # 候选集太小可能漏掉相关文档，太大则 Rerank 延迟线性增加
     # 业界推荐：Top-20 ~ Top-50

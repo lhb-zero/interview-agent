@@ -157,7 +157,7 @@ const currentSessionId = ref(null)
 const isUserAtBottom = ref(true)
 const msgRefs = ref({})
 
-const THINKING_MODELS = ['qwen3', 'qwen3.5', 'deepseek-r1', 'deepseek-v3.1']
+const THINKING_MODELS = ['qwen3', 'qwen3.5', 'deepseek-r1', 'deepseek-v3.1', 'deepseek-v4-pro']
 const currentModel = ref('qwen3.5:4b')
 const supportsThinking = computed(() => THINKING_MODELS.some(m => currentModel.value.toLowerCase().startsWith(m)))
 if (!supportsThinking.value) thinkingEnabled.value = false
