@@ -22,8 +22,6 @@ public class EvalProperties {
 
     @Data
     public static class JudgeModel {
-        /** 评审模型名称 */
-        private String model = "qwen3:1.7b";
         /** 温度（低温度更确定性） */
         private double temperature = 0.1;
         /** 最大重试次数 */

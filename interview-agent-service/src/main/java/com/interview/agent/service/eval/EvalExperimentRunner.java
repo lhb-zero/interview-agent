@@ -35,6 +35,9 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -153,30 +156,53 @@ public class EvalExperimentRunner {
                 long genTime = System.currentTimeMillis() - genStart;
                 evalResult.setGenerationTimeMs((int) genTime);
                 evalResult.setGeneratedAnswer(generatedAnswer);
+                log.info("[Eval]   检索={}ms, 生成回答={}ms, 检索文档数={}",
+                        retrievalTime, genTime, contexts.size());
 
                 long evalStart = System.currentTimeMillis();
                 List<String> gtContexts = parseGroundTruthContexts(testCase.getGroundTruthContexts());
 
+                // 并行计算各指标（每个指标独立调用 LLM，并行可大幅提速）
+                int concurrency = evalProperties.getExecution().getConcurrency();
+                ExecutorService executor = Executors.newFixedThreadPool(
+                        Math.max(1, Math.min(concurrency, 8)));
+                List<CompletableFuture<Void>> futures = new ArrayList<>();
+
                 for (MetricCalculator calculator : calculators) {
                     if (!isMetricEnabled(calculator.metricName())) continue;
-                    try {
-                        MetricScore score = calculator.calculate(
-                                testCase.getQuestion(),
-                                generatedAnswer,
-                                contexts,
-                                testCase.getGroundTruthAnswer(),
-                                gtContexts
-                        );
-                        setMetricScore(evalResult, calculator.metricName(), score);
-                    } catch (Exception e) {
-                        log.warn("[Eval] 指标 {} 计算失败: {}", calculator.metricName(), e.getMessage());
-                    }
+                    String metricName = calculator.metricName();
+                    CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                        try {
+                            long metricStart = System.currentTimeMillis();
+                            MetricScore score = calculator.calculate(
+                                    testCase.getQuestion(),
+                                    generatedAnswer,
+                                    contexts,
+                                    testCase.getGroundTruthAnswer(),
+                                    gtContexts
+                            );
+                            long metricElapsed = System.currentTimeMillis() - metricStart;
+                            log.info("[Eval]   指标 {} 完成, 耗时={}ms, score={}",
+                                    metricName, metricElapsed, score.getScore());
+                            synchronized (evalResult) {
+                                setMetricScore(evalResult, metricName, score);
+                            }
+                        } catch (Exception e) {
+                            log.warn("[Eval] 指标 {} 计算失败: {}", metricName, e.getMessage());
+                        }
+                    }, executor);
+                    futures.add(future);
                 }
+
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+                executor.shutdown();
 
                 long evalTime = System.currentTimeMillis() - evalStart;
                 evalResult.setEvalTimeMs((int) evalTime);
                 evalResult.setStatus("COMPLETED");
                 completed++;
+                log.info("[Eval] 测试用例 {}/{} 完成, 总耗时={}ms", i + 1, testCases.size(),
+                        System.currentTimeMillis() - retrievalStart);
 
                 totalPrecision += evalResult.getContextPrecision() != null ? evalResult.getContextPrecision() : 0;
                 totalRecall += evalResult.getContextRecall() != null ? evalResult.getContextRecall() : 0;

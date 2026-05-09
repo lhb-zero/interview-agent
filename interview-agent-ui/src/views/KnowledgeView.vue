@@ -5,7 +5,7 @@
         <h2>知识库管理</h2>
         <p class="header-desc">管理面试知识文档，上传后自动分块并向量化存储</p>
       </div>
-      <el-button type="primary" :icon="Upload" @click="uploadDialogVisible = true" class="upload-btn">
+      <el-button type="primary" :icon="Upload" @click="openUploadDialog" class="upload-btn">
         上传文档
       </el-button>
     </div>
@@ -130,7 +130,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="uploadDialogVisible = false">取消</el-button>
+        <el-button @click="closeUploadDialog">取消</el-button>
         <el-button type="primary" @click="submitUpload" :loading="uploading">确认上传</el-button>
       </template>
     </el-dialog>
@@ -182,8 +182,33 @@ async function loadDocuments() {
   }
 }
 
+function openUploadDialog() {
+  // 重置表单和文件状态
+  uploadForm.value = { title: '', domain: 'java' }
+  selectedFile.value = null
+  // 清除 el-upload 组件的文件列表
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+  }
+  uploadDialogVisible.value = true
+}
+
+function closeUploadDialog() {
+  uploadDialogVisible.value = false
+  // 清除 el-upload 组件的文件列表
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+  }
+}
+
 function handleFileChange(file) {
   selectedFile.value = file.raw
+  // 自动从文件名提取标题（去掉扩展名）
+  if (file.raw && !uploadForm.value.title) {
+    const fileName = file.raw.name
+    const titleWithoutExt = fileName.replace(/\.[^.]+$/, '')
+    uploadForm.value.title = titleWithoutExt
+  }
 }
 
 async function submitUpload() {
@@ -216,6 +241,10 @@ async function submitUpload() {
     uploadDialogVisible.value = false
     uploadForm.value = { title: '', domain: 'java' }
     selectedFile.value = null
+    // 清除 el-upload 组件的文件列表
+    if (uploadRef.value) {
+      uploadRef.value.clearFiles()
+    }
     loadDocuments()
   } catch (e) {
     ElMessage.error('上传失败')

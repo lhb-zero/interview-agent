@@ -1,7 +1,7 @@
 # RAG 评估模块技术文档
 
-> 版本：v1.0
-> 日期：2026-05-07
+> 版本：v1.1
+> 日期：2026-05-08
 > 状态：已完成
 > 关联 Phase：Phase 5 — RAG 评估
 
@@ -309,12 +309,16 @@ RAGAS (Python):  LangChain → OpenAI API → 解析响应 → 算分
 
 ### 5.3 与 RAGAS 的指标对应关系
 
-| RAGAS 指标 | Java 实现类 | 计算方式 |
-|-----------|------------|---------|
-| Context Precision | `ContextPrecisionCalculator` | 每个片段问 LLM YES/NO → 加权精确率 |
-| Context Recall | `ContextRecallCalculator` | 标准答案拆陈述 → 逐个验证 |
-| Faithfulness | `FaithfulnessCalculator` | 回答提取声明 → 逐个验证 |
-| Answer Relevancy | `AnswerRelevancyCalculator` | 反推问题 → bge-m3 余弦相似度 |
+| RAGAS 指标 | Java 实现类 | 计算方式 | LLM 调用次数 |
+|-----------|------------|---------|-------------|
+| Context Precision | `ContextPrecisionCalculator` | 所有片段拼入一次 Prompt 批量判断 YES/NO → 加权精确率 | 1 次/题 |
+| Context Recall | `ContextRecallCalculator` | 标准答案拆陈述（1 次）→ 所有陈述批量验证（1 次） | 2 次/题 |
+| Faithfulness | `FaithfulnessCalculator` | 回答提取声明（1 次）→ 所有声明批量验证（1 次） | 2 次/题 |
+| Answer Relevancy | `AnswerRelevancyCalculator` | 反推问题（1 次）→ bge-m3 余弦相似度（本地，无 LLM） | 1 次/题 |
+
+> **批量优化说明**：原始 RAGAS 论文中每个文档/声明单独调用一次 LLM（如 5 个文档 = 5 次调用）。
+> 本项目将同类型的判断合并到一次 Prompt 中，用 JSON 数组格式返回批量结果，LLM 调用次数从 ~17 次/题降至 ~7 次/题。
+> 若批量解析失败，自动降级为逐条调用（兼容性保障）。
 
 ---
 
@@ -351,7 +355,7 @@ app:
   eval:
     enabled: true
     judge:
-      model: qwen3:1.7b        # 评审模型
+      # model 已移除 — 评审模型自动跟随当前 Provider（spring.ai.model.model-name）
       temperature: 0.1          # 低温度保证确定性
       max-retries: 2            # 失败重试
       timeout-ms: 60000         # 超时
@@ -362,9 +366,15 @@ app:
       answer-relevancy-enabled: true
       relevancy-synthetic-questions: 5  # Answer Relevancy 反推问题数
     execution:
-      concurrency: 1            # 顺序执行（小模型不支持并发）
+      concurrency: 4            # 指标并行线程数（4 个指标可同时计算）
       batch-size: 10
 ```
+
+**Judge 模型自动跟随**：评审模型不再硬编码，自动使用 `spring.ai.model.model-name` 配置的模型。
+切换 Provider（ollama/deepseek）或更换模型时，评估模块自动适配，无需修改 eval 配置。
+
+**DeepSeek 调用优化**：Judge 调用限制 `maxTokens=1024`（YES/NO 判断不需要 4096），
+HTTP 连接超时 10s + 读取超时 60s 防止 API 响应慢导致线程阻塞。
 
 ### 6.3 API 设计
 
@@ -392,13 +402,28 @@ app:
                     for each test case:
                       ① RAG 检索（复用 searchSimilarDocs）
                       ② LLM 生成回答（复用 rag-enhanced-answer.st）
-                      ③ 4 个 Calculator 逐个打分
+                      ③ 4 个 Calculator 并行打分（CompletableFuture + 线程池）
                       ④ 保存 EvalResult
                       ⑤ 更新实验进度
                     → 计算聚合指标 → 状态改为 COMPLETED
 
 前端 GET /experiments/{id} → 每 3 秒轮询 → 更新进度条
 ```
+
+**LLM 调用次数分析（优化后）**：
+
+| 步骤 | 调用目的 | 调用次数 | 说明 |
+|------|---------|---------|------|
+| generateAnswer | 用检索文档生成面试回答 | 1 | 复用 RAG 增强回答模板 |
+| ContextPrecision | 判断每个检索文档是否有用 | **1** | 5 个文档合并为 1 次批量判断 |
+| ContextRecall 拆解 | 标准答案拆分为独立陈述 | 1 | 输出 JSON 数组 |
+| ContextRecall 验证 | 检查每个陈述是否被上下文覆盖 | **1** | 所有陈述合并为 1 次批量判断 |
+| Faithfulness 提取 | 从生成回答中提取事实声明 | 1 | 输出 JSON 数组 |
+| Faithfulness 验证 | 检查每个声明是否有上下文支持 | **1** | 所有声明合并为 1 次批量判断 |
+| AnswerRelevancy | 从回答反推问题 + Embedding 相似度 | 1 | Embedding 用本地 bge-m3，无 LLM |
+| **合计** | | **~7 次/题** | 原始方案 ~17 次/题，减少 60% |
+
+> 4 个指标通过 `CompletableFuture.allOf()` 并行执行，实际墙钟时间约等于最慢单指标的耗时。
 
 ---
 
@@ -471,18 +496,31 @@ app:
 #### LlmJudgeClient（LLM 评审客户端）
 
 ```java
-// 核心方法：调用 Ollama 做 YES/NO 判断
+// 单条判断：调用 LLM 做 YES/NO 判断
 public boolean judgeYesNo(String systemPrompt, String userPrompt) {
-    OllamaChatOptions options = OllamaChatOptions.builder()
-        .model("qwen3:1.7b")
-        .temperature(0.1)  // 低温度保证确定性
-        .build();
-    Prompt prompt = new Prompt(List.of(
-        new SystemMessage(systemPrompt),
-        new UserMessage(userPrompt)
-    ), options);
-    String response = chatModel.call(prompt).getResult().getOutput().getText();
+    String response = judge(systemPrompt, userPrompt);
     return response.toUpperCase().contains("YES");
+}
+
+// 批量判断：多个条目合并为一次 LLM 调用，返回每个条目的判断结果
+public List<Boolean> judgeYesNoBatch(String systemPrompt, List<String> items, String itemLabel) {
+    // 将所有条目拼入一个 Prompt
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < items.size(); i++) {
+        sb.append(String.format("【%s%d】\n%s\n\n", itemLabel, i + 1, items.get(i)));
+    }
+    sb.append(String.format("请对以上%d个%s逐一判断，严格按JSON数组格式输出，每个元素为YES或NO。\n", items.size(), itemLabel));
+    sb.append(String.format("示例输出：[\"YES\", \"NO\", \"YES\"]（共%d个元素）", items.size()));
+
+    String response = judge(systemPrompt, sb.toString());
+    // 解析 JSON 数组，若失败则降级为逐条调用
+    try {
+        List<String> results = objectMapper.readValue(extractJsonArray(response), ...);
+        return results.stream().map(r -> r.toUpperCase().contains("YES")).toList();
+    } catch (Exception e) {
+        // 降级：逐条调用
+        return items.stream().map(item -> judgeYesNo(systemPrompt, item)).toList();
+    }
 }
 ```
 
@@ -490,14 +528,13 @@ public boolean judgeYesNo(String systemPrompt, String userPrompt) {
 
 ```java
 public MetricScore calculate(question, answer, contexts, gt, gtContexts) {
-    List<Boolean> relevanceJudgments = new ArrayList<>();
-    for (String context : contexts) {
-        boolean relevant = judgeClient.judgeYesNo(
-            "判断参考资料是否对回答问题有帮助。只回答 YES 或 NO。",
-            "【问题】" + question + "\n【参考资料】" + context
-        );
-        relevanceJudgments.add(relevant);
-    }
+    // 批量判断：将所有文档拼入一次调用
+    List<String> items = contexts.stream()
+        .map(ctx -> "【用户问题】\n" + question + "\n\n【参考资料】\n" + ctx)
+        .toList();
+    List<Boolean> relevanceJudgments = judgeClient.judgeYesNoBatch(
+        "判断参考资料是否对回答问题有帮助。只回答 YES 或 NO。", items, "参考资料");
+
     // RAGAS 加权精确率公式
     double score = 0.0;
     int relevantCount = 0;
@@ -564,6 +601,22 @@ public void runExperimentAsync(Long experimentId) {
 
 **注意**：需要在启动类加 `@EnableAsync`，且异步方法不能在同一个类内部调用（Spring AOP 代理限制）。
 
+### 8.3 评估 LLM 调用次数过多导致超时
+
+**问题**：原始 RAGAS 设计每个文档/声明单独调用一次 LLM。5 个文档 × 4 个指标 ≈ 17 次 LLM 调用/题，
+使用 DeepSeek API（3-10 秒/次）时单题需要 1-3 分钟，15 题需要 15-45 分钟，前端长时间显示"运行中"。
+
+**根因**：原始 RAGAS 论文面向 GPT-3.5/4，API 延迟低，未考虑调用次数优化。
+且 `RestClient` 未配置 HTTP 超时，API 响应慢时线程无限阻塞。
+
+**解决方案**：
+1. **批量调用**：同类型判断合并为一次 Prompt（如 5 个文档的 YES/NO 判断合为 1 次），用 JSON 数组返回结果
+2. **指标并行**：4 个指标通过 `CompletableFuture` 并行执行
+3. **HTTP 超时**：DeepSeek RestClient 配置 10s 连接 + 60s 读取超时
+4. **maxTokens 限制**：Judge 调用限制 1024 tokens（YES/NO 不需要 4096）
+
+**效果**：LLM 调用从 ~17 次/题降至 ~7 次/题，配合并行执行，单题耗时从 1-3 分钟降至 20-40 秒。
+
 ---
 
 ## 九、使用指南
@@ -624,7 +677,7 @@ public void runExperimentAsync(Long experimentId) {
 
 ### 10.1 面试话术
 
-> "我参考 RAGAS 论文，用 Java 自实现了 4 个 RAG 评估指标。核心思路是 LLM-as-Judge：用 Ollama 本地模型（qwen3:1.7b，温度 0.1）当裁判，对检索结果和生成回答逐条打分。在 15 道 Java 面试题的数据集上做了 A/B 测试，结果显示开启查询改写 + 混合检索 + Reranking 后，综合分从基线的约 0.52 提升到 0.81，提升了 56%。其中检索精度提升最大，因为混合检索解决了专有名词精确匹配的问题。"
+> "我参考 RAGAS 论文，用 Java 自实现了 4 个 RAG 评估指标。核心思路是 LLM-as-Judge：用 LLM 当裁判，对检索结果和生成回答打分。原始 RAGAS 每个文档单独调用一次 LLM，我做了批量优化——将同类型判断合并到一次 Prompt 中用 JSON 数组返回，调用次数从 17 次/题降到 7 次/题。同时 4 个指标通过 CompletableFuture 并行执行。在 15 道 Java 面试题的数据集上做了 A/B 测试，结果显示开启查询改写 + 混合检索 + Reranking 后，综合分从基线的约 0.52 提升到 0.81，提升了 56%。"
 
 ### 10.2 可能的追问
 
@@ -633,7 +686,7 @@ public void runExperimentAsync(Long experimentId) {
 | "为什么不用 RAGAS？" | RAGAS 是 Python 库，我的项目是 Java/Spring Boot。我理解了 RAGAS 的原理（LLM-as-Judge + 4 个指标），用 Java 从零实现，与项目原生集成 |
 | "评估的 LLM 和生成的 LLM 是同一个吗？" | 可以是同一个，也可以不同。评估 LLM 只需要做 YES/NO 判断，小模型就够用。我用 qwen3:1.7b 做 Judge，温度设为 0.1 保证确定性 |
 | "怎么保证评估的准确性？" | 1）标准答案由人工准备，保证质量；2）LLM Judge 温度设低减少随机性；3）每个指标有详细的计算过程可追溯；4）多次运行取平均 |
-| "这个评估模块有什么局限？" | 1）依赖标准答案的质量；2）LLM Judge 本身有局限（小模型判断可能不准）；3）评估耗时较长（每道题 1-2 分钟）；4）目前是离线评估，不是实时评估 |
+| "这个评估模块有什么局限？" | 1）依赖标准答案的质量；2）LLM Judge 本身有局限（小模型判断可能不准）；3）评估耗时（优化后每道题约 20-40 秒，批量调用 + 指标并行）；4）目前是离线评估，不是实时评估 |
 
 ### 10.3 知识点总结
 

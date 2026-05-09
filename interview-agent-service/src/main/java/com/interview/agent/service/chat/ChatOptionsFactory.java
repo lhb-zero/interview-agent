@@ -31,17 +31,26 @@ public class ChatOptionsFactory {
     }
 
     /**
+     * 构建 Judge 选项，模型名自动跟当前 Provider 走（用于 LlmJudgeClient）
+     */
+    public ChatOptions buildJudgeOptions(double temperature, int numCtx) {
+        return buildJudgeOptions(properties.getModelName(), temperature, numCtx);
+    }
+
+    /**
      * 构建带显式模型参数的选项（用于 LlmJudgeClient）
+     * 优先使用传入的 model，若为空则回退到当前 Provider 的默认模型
      */
     public ChatOptions buildJudgeOptions(String model, double temperature, int numCtx) {
+        String resolvedModel = (model == null || model.isBlank()) ? properties.getModelName() : model;
         if (properties.isDeepSeek()) {
             return DeepSeekChatOptions.builder()
-                    .model(model)
+                    .model(resolvedModel)
                     .temperature(temperature)
                     .build();
         }
         return OllamaChatOptions.builder()
-                .model(model)
+                .model(resolvedModel)
                 .temperature(temperature)
                 .numCtx(numCtx)
                 .build();

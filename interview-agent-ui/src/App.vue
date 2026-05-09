@@ -27,7 +27,7 @@
         <el-menu :default-active="currentRoute" class="nav-menu" @select="handleMenuSelect">
           <el-menu-item index="/">
             <el-icon><ChatDotRound /></el-icon>
-            <span>智能对话</span>
+            <span>知识问答</span>
           </el-menu-item>
           <el-menu-item index="/knowledge">
             <el-icon><Folder /></el-icon>

@@ -36,12 +36,12 @@ public class ContextPrecisionCalculator implements MetricCalculator {
             return new MetricScore(0.0, "{}");
         }
 
-        List<Boolean> relevanceJudgments = new ArrayList<>();
+        // 批量判断：将所有文档拼入一次调用，减少 LLM 请求次数
+        List<String> items = new ArrayList<>();
         for (String context : contexts) {
-            String userPrompt = "【用户问题】\n" + question + "\n\n【参考资料】\n" + context;
-            boolean relevant = judgeClient.judgeYesNo(SYSTEM_PROMPT, userPrompt);
-            relevanceJudgments.add(relevant);
+            items.add("【用户问题】\n" + question + "\n\n【参考资料】\n" + context);
         }
+        List<Boolean> relevanceJudgments = judgeClient.judgeYesNoBatch(SYSTEM_PROMPT, items, "参考资料");
 
         // 加权累积精确率（RAGAS 公式）
         double score = 0.0;

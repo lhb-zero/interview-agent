@@ -39,7 +39,7 @@ public class DeepSeekThinkingInterceptor implements ClientHttpRequestInterceptor
     @NonNull
     public ClientHttpResponse intercept(@NonNull HttpRequest request, @NonNull byte[] body,
                                          @NonNull ClientHttpRequestExecution execution) throws IOException {
-        if (!THINKING_ENABLED.get() || body == null || body.length == 0) {
+        if (body == null || body.length == 0) {
             return execution.execute(request, body);
         }
 
@@ -52,8 +52,9 @@ public class DeepSeekThinkingInterceptor implements ClientHttpRequestInterceptor
             String jsonBody = new String(body, StandardCharsets.UTF_8);
             ObjectNode root = (ObjectNode) objectMapper.readTree(jsonBody);
 
+            // DeepSeek v4 默认思考模式为 enabled，必须显式设置
             ObjectNode thinking = objectMapper.createObjectNode();
-            thinking.put("type", "enabled");
+            thinking.put("type", THINKING_ENABLED.get() ? "enabled" : "disabled");
             root.set("thinking", thinking);
 
             byte[] modifiedBody = objectMapper.writeValueAsBytes(root);

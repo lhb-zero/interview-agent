@@ -2,6 +2,7 @@ package com.interview.agent.service.eval.metric;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.interview.agent.service.chat.ChatProviderProperties;
 import com.interview.agent.service.eval.EvalProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
@@ -26,12 +27,17 @@ public class LlmJudgeClient {
     private final ChatModel chatModel;
     private final EvalProperties properties;
     private final ChatOptionsFactory chatOptionsFactory;
+    private final ChatProviderProperties providerProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public LlmJudgeClient(ChatModel chatModel, EvalProperties properties, ChatOptionsFactory chatOptionsFactory) {
+    public LlmJudgeClient(ChatModel chatModel, EvalProperties properties,
+                           ChatOptionsFactory chatOptionsFactory, ChatProviderProperties providerProperties) {
         this.chatModel = chatModel;
         this.properties = properties;
         this.chatOptionsFactory = chatOptionsFactory;
+        this.providerProperties = providerProperties;
+        log.info("[Eval-Judge] 初始化完成, provider={}, model={}",
+                providerProperties.getProvider(), providerProperties.getModelName());
     }
 
     /**
@@ -41,13 +47,17 @@ public class LlmJudgeClient {
         EvalProperties.JudgeModel judgeConfig = properties.getJudge();
         for (int attempt = 0; attempt <= judgeConfig.getMaxRetries(); attempt++) {
             try {
+                long start = System.currentTimeMillis();
                 ChatOptions options = chatOptionsFactory.buildJudgeOptions(
-                        judgeConfig.getModel(), judgeConfig.getTemperature(), 4096);
+                        judgeConfig.getTemperature(), 4096);
                 Prompt prompt = new Prompt(List.of(
                         new SystemMessage(systemPrompt),
                         new UserMessage(userPrompt)
                 ), options);
                 String response = chatModel.call(prompt).getResult().getOutput().getText();
+                long elapsed = System.currentTimeMillis() - start;
+                log.debug("[Eval-Judge] LLM 调用成功, 耗时={}ms, 响应长度={}",
+                        elapsed, response != null ? response.length() : 0);
                 if (response != null) {
                     return response.trim();
                 }
@@ -102,6 +112,50 @@ public class LlmJudgeClient {
         } catch (Exception e) {
             log.warn("[Eval-Judge] JSON 解析失败: {}, response: {}", e.getMessage(), response);
             return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 批量 YES/NO 判断 — 一次调用处理多个条目，大幅减少 LLM 调用次数
+     * @param systemPrompt 系统提示
+     * @param items 待判断的条目列表
+     * @param itemLabel 条目在 prompt 中的标签（如 "参考资料"、"陈述"）
+     * @return 每个条目的判断结果（true=YES/SUPPORTED, false=NO/NOT_SUPPORTED）
+     */
+    public List<Boolean> judgeYesNoBatch(String systemPrompt, List<String> items, String itemLabel) {
+        if (items.isEmpty()) return Collections.emptyList();
+        log.info("[Eval-Judge] 批量判断: {}个{}, 合并为1次调用", items.size(), itemLabel);
+        if (items.size() == 1) {
+            return List.of(judgeYesNo(systemPrompt, items.get(0)));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < items.size(); i++) {
+            sb.append(String.format("【%s%d】\n%s\n\n", itemLabel, i + 1, items.get(i)));
+        }
+        sb.append(String.format("请对以上%d个%s逐一判断，严格按JSON数组格式输出结果，每个元素为YES或NO。\n", items.size(), itemLabel));
+        sb.append(String.format("示例输出：[\"YES\", \"NO\", \"YES\"]（共%d个元素）", items.size()));
+
+        String response = judge(systemPrompt, sb.toString());
+        try {
+            String json = extractJsonArray(response);
+            List<String> results = objectMapper.readValue(json, new TypeReference<List<String>>() {});
+            List<Boolean> boolResults = new ArrayList<>();
+            for (String r : results) {
+                String upper = r.toUpperCase().trim();
+                boolResults.add(upper.contains("YES") || upper.contains("SUPPORTED"));
+            }
+            // 如果返回的数量不匹配，补齐
+            while (boolResults.size() < items.size()) boolResults.add(false);
+            return boolResults.subList(0, items.size());
+        } catch (Exception e) {
+            log.warn("[Eval-Judge] 批量判断解析失败: {}, response: {}", e.getMessage(), response);
+            // 降级为逐个判断
+            List<Boolean> fallback = new ArrayList<>();
+            for (String item : items) {
+                fallback.add(judgeYesNo(systemPrompt, item));
+            }
+            return fallback;
         }
     }
 

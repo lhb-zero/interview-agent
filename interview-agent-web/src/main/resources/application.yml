@@ -21,6 +21,7 @@ spring:
       chat: deepseek
       embedding: ollama
       model-name: deepseek-v4-pro
+#      model-name: qwen3:1.7b
 
     # Ollama 配置
     ollama:
@@ -139,7 +140,7 @@ app:
   eval:
     enabled: true
     judge:
-      model: qwen3:1.7b
+      # model 已移除 — 评审模型自动跟随当前 Provider（spring.ai.model.model-name）
       temperature: 0.1
       max-retries: 2
       timeout-ms: 60000
@@ -148,7 +149,7 @@ app:
       context-recall-enabled: true
       faithfulness-enabled: true
       answer-relevancy-enabled: true
-      relevancy-synthetic-questions: 5
+      relevancy-synthetic-questions: 3
     execution:
       concurrency: 1
       batch-size: 10

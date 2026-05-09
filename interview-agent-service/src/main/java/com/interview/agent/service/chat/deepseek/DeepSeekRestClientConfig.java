@@ -7,14 +7,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestClient;
+
+import java.time.Duration;
 
 /**
  * DeepSeek 自动配置
  *
  * 当 spring.ai.model.chat=deepseek 时激活：
- * 1. 创建指向 DeepSeek API 的 OpenAiApi（带 thinking 拦截器）
+ * 1. 创建指向 DeepSeek API 的 OpenAiApi（带 thinking 拦截器 + 超时配置）
  * 2. 创建 OpenAiChatModel
  * 3. 包装为 DeepSeekChatModel（处理 thinking 参数注入）
  *
@@ -32,7 +35,12 @@ public class DeepSeekRestClientConfig {
 
     @Bean
     public OpenAiApi deepSeekOpenAiApi() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(Duration.ofSeconds(10));
+        requestFactory.setReadTimeout(Duration.ofSeconds(60));
+
         RestClient.Builder restClientBuilder = RestClient.builder()
+                .requestFactory(requestFactory)
                 .requestInterceptor(new DeepSeekThinkingInterceptor());
 
         return OpenAiApi.builder()
